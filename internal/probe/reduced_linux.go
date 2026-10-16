@@ -57,7 +57,7 @@ func (s *reducedSender) handle(in incoming) {
 		return
 	}
 	seq := binary.BigEndian.Uint16(in.data[:2])
-	s.replies <- Reply{Seq: seq, Dst: in.peer, From: in.offender, At: in.at}
+	s.replies <- Reply{Seq: seq, Dst: in.peer, From: in.offender, At: in.at, Unreachable: in.unreachable}
 }
 
 func (s *reducedSender) Replies() <-chan Reply { return s.replies }

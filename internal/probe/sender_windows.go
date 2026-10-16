@@ -71,13 +71,14 @@ func (s *echoSender) echo(p Packet) {
 		return
 	}
 	defer icmpCloseHandle.Call(h)
-	if from, ok := sendEcho(h, p); ok {
-		s.replies <- Reply{Seq: p.Seq, Dst: p.Dst, From: from, At: time.Now()}
+	if from, unreachable, ok := sendEcho(h, p); ok {
+		s.replies <- Reply{Seq: p.Seq, Dst: p.Dst, From: from, At: time.Now(), Unreachable: unreachable}
 	}
 }
 
-// sendEcho sends one echo request with p's hop limit and returns the address that answered.
-func sendEcho(h uintptr, p Packet) (netip.Addr, bool) {
+// sendEcho sends one echo request with p's hop limit and returns the address that answered
+// and whether its answer was destination-unreachable.
+func sendEcho(h uintptr, p Packet) (from netip.Addr, unreachable, ok bool) {
 	dst := p.Dst.As4()
 	opts := ipOptionInformation{TTL: uint8(p.TTL)}
 	buf := make([]byte, 1024)
@@ -88,20 +89,24 @@ func sendEcho(h uintptr, p Packet) (netip.Addr, bool) {
 		uintptr(unsafe.Pointer(&buf[0])), uintptr(len(buf)),
 		uintptr(Timeout.Milliseconds()))
 	reply := (*icmpEchoReply)(unsafe.Pointer(&buf[0]))
-	if reply.Address == 0 || !answered(reply.Status) {
-		return netip.Addr{}, false
+	unreachable, ok = answered(reply.Status)
+	if reply.Address == 0 || !ok {
+		return netip.Addr{}, false, false
 	}
 	var a [4]byte
 	binary.LittleEndian.PutUint32(a[:], reply.Address)
-	return netip.AddrFrom4(a), true
+	return netip.AddrFrom4(a), unreachable, true
 }
 
-func answered(status uint32) bool {
+// answered reports whether status carries an answer, and whether that answer was destination-unreachable.
+func answered(status uint32) (unreachable, ok bool) {
 	switch status {
-	case ipSuccess, ipTTLExpiredTransit, ipDestNetUnreach, ipDestHostUnreach, ipDestProtUnreach, ipDestPortUnreach:
-		return true
+	case ipSuccess, ipTTLExpiredTransit:
+		return false, true
+	case ipDestNetUnreach, ipDestHostUnreach, ipDestProtUnreach, ipDestPortUnreach:
+		return true, true
 	}
-	return false
+	return false, false
 }
 
 func (s *echoSender) Replies() <-chan Reply { return s.replies }

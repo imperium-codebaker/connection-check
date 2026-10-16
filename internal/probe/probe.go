@@ -29,6 +29,9 @@ type Reply struct {
 	Dst  netip.Addr // the probe's original destination
 	From netip.Addr // the router or host that answered
 	At   time.Time
+	// Unreachable is true when the answer was a destination-unreachable error rather than
+	// an echo reply or an expired hop limit.
+	Unreachable bool
 }
 
 // Mode describes what a Sender can measure.

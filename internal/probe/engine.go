@@ -124,7 +124,7 @@ func (e *Engine) nextSeq() uint16 {
 func (e *Engine) match(r Reply) {
 	e.mu.Lock()
 	p, ok := e.pending[r.Seq]
-	if !ok || p.dst != r.Dst {
+	if !ok || p.dst != r.Dst || !answers(p, r) {
 		e.mu.Unlock()
 		return
 	}
@@ -134,6 +134,16 @@ func (e *Engine) match(r Reply) {
 	}
 	e.mu.Unlock()
 	e.out(Result{Dst: p.dst, TTL: p.ttl, Sent: p.sent, From: r.From, RTT: r.At.Sub(p.sent)})
+}
+
+// answers reports whether r answers probe p. Anything from the destination does, a refusal
+// included. A router answers only a hop probe, and only by reporting the hop limit expired;
+// a router's unreachable error means the probe got no further, so the probe expires as lost.
+func answers(p pending, r Reply) bool {
+	if r.From == p.dst {
+		return true
+	}
+	return p.ttl != DestTTL && !r.Unreachable
 }
 
 func (e *Engine) markReached(dst netip.Addr, ttl int, at time.Time) {

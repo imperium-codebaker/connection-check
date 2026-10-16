@@ -55,7 +55,7 @@ func Judge(in Input) Verdict {
 	located := true
 	if g != Good {
 		v.BlameTTL, v.Owner, located = blame(in, m)
-		v.LongRoad = m == Latency && isFar(v.Owner) && GradeOf(Loss, in.Dest.Loss) == Good &&
+		v.LongRoad = m == Latency && g == Fair && isFar(v.Owner) && GradeOf(Loss, in.Dest.Loss) == Good &&
 			GradeOf(Jitter, in.Dest.Jitter) == Good
 	}
 	v.Headline, v.Action = words(in, v, located)

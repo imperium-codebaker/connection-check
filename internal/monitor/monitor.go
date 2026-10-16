@@ -130,11 +130,15 @@ func newWindow(kind string, from, to, now time.Time) (window, error) {
 func (m *Monitor) Snapshots() []report.Snapshot {
 	m.mu.Lock()
 	list := append([]*site(nil), m.sites...)
+	wins := make([]window, len(list))
+	for i, s := range list {
+		wins[i] = s.window
+	}
 	m.mu.Unlock()
 	now := time.Now()
 	out := make([]report.Snapshot, len(list))
 	for i, s := range list {
-		out[i] = m.snapshot(s, now)
+		out[i] = m.snapshot(s, wins[i], now)
 	}
 	return out
 }

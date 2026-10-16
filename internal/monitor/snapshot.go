@@ -12,9 +12,9 @@ import (
 	"github.com/johncbrubaker/connection-check/internal/verdict"
 )
 
-// snapshot assembles what the page shows for site s at time now.
-func (m *Monitor) snapshot(s *site, now time.Time) report.Snapshot {
-	from, to := s.window.span(now)
+// snapshot assembles what the page shows for site s over window w at time now.
+func (m *Monitor) snapshot(s *site, w window, now time.Time) report.Snapshot {
+	from, to := w.span(now)
 	sums := m.hopSummaries(s, from, to)
 	infos := m.infos(sums)
 	destInfo := m.look.Get(s.addr)
@@ -31,7 +31,7 @@ func (m *Monitor) snapshot(s *site, now time.Time) report.Snapshot {
 	gradeHops(hops, &d)
 	return report.Snapshot{
 		V: 1, Site: s.cfg.Name, Host: s.cfg.Host, Addr: s.addr.String(),
-		From: from.UnixMilli(), To: to.UnixMilli(), OS: goos, Mode: m.modeInfo(), Window: s.window.kind,
+		From: from.UnixMilli(), To: to.UnixMilli(), OS: goos, Mode: m.modeInfo(), Window: w.kind,
 		Verdict: judge(s.cfg.Name, hops, d), Hops: hops, Dest: d, Timeline: timeline(s.route, now),
 	}
 }

@@ -37,6 +37,7 @@ type Bucket struct {
 // Series holds recent samples for one hop or the destination.
 type Series struct {
 	samples []Sample
+	router  netip.Addr // the router answering a hop; unset for the destination and before any reply
 }
 
 // Add records x and drops samples older than Keep.

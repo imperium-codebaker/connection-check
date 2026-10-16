@@ -53,14 +53,14 @@ func parseICMP(b []byte, peer netip.Addr) (Reply, bool) {
 		}
 		return Reply{Seq: uint16(body.Seq), Dst: peer, From: peer}, true
 	case *icmp.TimeExceeded:
-		return quotedReply(body.Data, peer)
+		return quotedReply(body.Data, peer, false)
 	case *icmp.DstUnreach:
-		return quotedReply(body.Data, peer)
+		return quotedReply(body.Data, peer, true)
 	}
 	return Reply{}, false
 }
 
-func quotedReply(data []byte, peer netip.Addr) (Reply, bool) {
+func quotedReply(data []byte, peer netip.Addr, unreachable bool) (Reply, bool) {
 	dst, seq, ok := quotedProbe(data)
-	return Reply{Seq: seq, Dst: dst, From: peer}, ok
+	return Reply{Seq: seq, Dst: dst, From: peer, Unreachable: unreachable}, ok
 }

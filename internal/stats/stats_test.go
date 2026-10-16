@@ -65,3 +65,34 @@ func TestBuckets(t *testing.T) {
 		t.Fatalf("buckets = %+v", b)
 	}
 }
+
+func TestNewRouterAtAHopStartsAFreshRow(t *testing.T) {
+	old, fresh := netip.MustParseAddr("192.0.2.1"), netip.MustParseAddr("198.51.100.1")
+	at := func(sec int, ms float64, lost bool, from netip.Addr) Sample {
+		x := sample(sec, ms, lost)
+		x.From = from
+		if lost {
+			x.From = netip.Addr{}
+		}
+		return x
+	}
+	r := NewRoute()
+	for sec := range 100 {
+		r.AddHop(2, at(sec, 200, false, old))
+	}
+	r.AddHop(2, at(100, 0, true, old)) // lost at the boundary, before the new router's first reply
+	r.AddHop(2, at(101, 1, false, fresh))
+	r.AddHop(2, at(102, 0, true, fresh))
+	r.AddHop(2, at(103, 1, false, fresh))
+	all := r.Hops(2, t0, t0.Add(time.Hour))[1]
+	if all.From != fresh || all.Sent != 3 || all.Lost != 1 || all.Avg != 1 {
+		t.Errorf("after the change: %+v", all)
+	}
+	if before := r.Hops(2, t0, t0.Add(100*time.Second))[1]; before.Sent != 0 {
+		t.Errorf("old router's samples kept: %+v", before)
+	}
+	r.AddHop(2, at(104, 200, false, old))
+	if back := r.Hops(2, t0, t0.Add(time.Hour))[1]; back.From != old || back.Sent != 1 {
+		t.Errorf("after changing back: %+v", back)
+	}
+}

@@ -39,7 +39,7 @@ func (s *pingSender) Send(p Packet) error {
 func (s *pingSender) handle(in incoming) {
 	if in.offender.IsValid() {
 		if seq, ok := echoSeq(in.data, 8); ok {
-			s.replies <- Reply{Seq: seq, Dst: in.peer, From: in.offender, At: in.at}
+			s.replies <- Reply{Seq: seq, Dst: in.peer, From: in.offender, At: in.at, Unreachable: in.unreachable}
 		}
 		return
 	}

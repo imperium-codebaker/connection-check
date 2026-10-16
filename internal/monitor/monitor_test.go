@@ -1,9 +1,42 @@
 package monitor
 
 import (
+	"context"
+	"net/netip"
+	"sync"
 	"testing"
 	"time"
+
+	"github.com/johncbrubaker/connection-check/internal/lookup"
+	"github.com/johncbrubaker/connection-check/internal/probe"
+	"github.com/johncbrubaker/connection-check/internal/stats"
 )
+
+// Run under -race: a snapshot taken while the window changes must describe one window.
+func TestSnapshotWhileWindowChanges(t *testing.T) {
+	s := &site{addr: netip.MustParseAddr("127.0.0.1"), route: stats.NewRoute(), window: window{kind: Default}}
+	m := &Monitor{ctx: context.Background(), eng: probe.NewEngine(nil, nil), look: lookup.New(), sites: []*site{s}}
+	from, to := time.Unix(1_700_000_000, 0), time.Unix(1_700_000_600, 0)
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		for i := range 200 {
+			if i%2 == 0 {
+				_ = m.SetWindow(0, Custom, from, to)
+			} else {
+				_ = m.SetWindow(0, Default, time.Time{}, time.Time{})
+			}
+		}
+	}()
+	for range 200 {
+		snap := m.Snapshots()[0]
+		if custom := snap.From == from.UnixMilli() && snap.To == to.UnixMilli(); custom != (snap.Window == Custom) {
+			t.Fatalf("window %q labels range %d..%d", snap.Window, snap.From, snap.To)
+		}
+	}
+	wg.Wait()
+}
 
 func TestWindowSpans(t *testing.T) {
 	press := time.Unix(1_700_000_000, 0)

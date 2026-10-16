@@ -23,7 +23,9 @@ type incoming struct {
 	data     []byte
 	peer     netip.Addr // sender for normal data; original destination for errors
 	offender netip.Addr // router that sent the error; zero for normal data
-	at       time.Time
+	// unreachable is true when the error is destination-unreachable rather than an expired hop limit.
+	unreachable bool
+	at          time.Time
 }
 
 func openErrSocket(proto int) (*errSocket, error) {
@@ -82,25 +84,32 @@ func (s *errSocket) readErr(handle func(incoming)) {
 	if err != nil || !ok {
 		return
 	}
-	if off, ok := offender(oob[:oobn]); ok {
-		handle(incoming{data: buf[:n], peer: netip.AddrFrom4(sa.Addr), offender: off, at: time.Now()})
+	if off, unreachable, ok := offender(oob[:oobn]); ok {
+		handle(incoming{data: buf[:n], peer: netip.AddrFrom4(sa.Addr), offender: off,
+			unreachable: unreachable, at: time.Now()})
 	}
 }
 
-// offender returns the address of the router named in an IP_RECVERR control message.
-func offender(oob []byte) (netip.Addr, bool) {
+// offender returns the address of the router named in an IP_RECVERR control message, and
+// whether its error was destination-unreachable.
+func offender(oob []byte) (addr netip.Addr, unreachable, ok bool) {
 	msgs, err := unix.ParseSocketControlMessage(oob)
 	if err != nil {
-		return netip.Addr{}, false
+		return netip.Addr{}, false, false
 	}
+	size := int(unsafe.Sizeof(unix.SockExtendedErr{}))
 	for _, m := range msgs {
-		if m.Header.Level != unix.IPPROTO_IP || m.Header.Type != unix.IP_RECVERR {
+		if m.Header.Level != unix.IPPROTO_IP || m.Header.Type != unix.IP_RECVERR || len(m.Data) < size {
 			continue
 		}
-		off := m.Data[unsafe.Sizeof(unix.SockExtendedErr{}):]
+		ee := (*unix.SockExtendedErr)(unsafe.Pointer(&m.Data[0]))
+		off := m.Data[size:]
 		if len(off) >= 8 && binary.NativeEndian.Uint16(off[0:2]) == unix.AF_INET {
-			return netip.AddrFrom4([4]byte(off[4:8])), true
+			return netip.AddrFrom4([4]byte(off[4:8])), ee.Type == icmpDestUnreach, true
 		}
 	}
-	return netip.Addr{}, false
+	return netip.Addr{}, false, false
 }
+
+// icmpDestUnreach is the ICMPv4 destination-unreachable message type.
+const icmpDestUnreach = 3

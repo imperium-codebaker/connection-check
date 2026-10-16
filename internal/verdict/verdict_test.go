@@ -83,6 +83,30 @@ func TestLongRoadWordingNamesTheSite(t *testing.T) {
 	}
 }
 
+func TestTotalLossNamesNoOwner(t *testing.T) {
+	dest := Hop{Sent: 1500, Loss: 100}
+	cases := map[string][]Hop{
+		"nothing answers":             route(300, 100, 100, 100),
+		"silent past the home router": route(300, 0, 100, 100, 100),
+		"silent past the handoff":     route(300, 0, 0, 0, 0, 0, 100),
+	}
+	for name, hops := range cases {
+		v := Judge(Input{Site: "Studio LA", Hops: hops, Dest: dest})
+		if v.Grade != Poor || v.Owner != "" || !strings.Contains(v.Action, "other websites") {
+			t.Errorf("%s: got %s owner=%q action=%q", name, v.Grade, v.Owner, v.Action)
+		}
+	}
+}
+
+func TestPoorLatencyIsNotExcusedAsALongRoad(t *testing.T) {
+	in := Input{Site: "Studio LA", Hops: route(300, 0, 0, 0, 0, 0, 0),
+		Dest: Hop{Answered: true, Sent: 1500, Avg: 150}}
+	v := Judge(in)
+	if v.Grade != Poor || v.LongRoad || strings.Contains(v.Action, "not a fault") {
+		t.Errorf("got %s longRoad=%v action=%q", v.Grade, v.LongRoad, v.Action)
+	}
+}
+
 func TestHopGradesIgnoreTroubleThatDoesNotCarry(t *testing.T) {
 	hops := []Hop{
 		{TTL: 1, Answered: true, Sent: 100, Loss: 64, Avg: 0.2},

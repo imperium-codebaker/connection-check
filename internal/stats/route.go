@@ -17,14 +17,19 @@ func NewRoute() *Route {
 	return &Route{hops: map[int]*Series{}}
 }
 
-// AddHop records a sample for the hop at ttl.
+// AddHop records a sample for the hop at ttl. A reply from a different router than the one
+// answering there so far starts the hop afresh, dropping the old router's samples, so one
+// row never mixes two routers.
 func (r *Route) AddHop(ttl int, x Sample) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	s := r.hops[ttl]
-	if s == nil {
+	if s == nil || !x.Lost && s.router.IsValid() && x.From != s.router {
 		s = &Series{}
 		r.hops[ttl] = s
+	}
+	if !x.Lost {
+		s.router = x.From
 	}
 	s.Add(x)
 }

@@ -13,6 +13,11 @@ func words(in Input, v Verdict, located bool) (string, string) {
 		return fmt.Sprintf("Your connection to %s looks fine (%.0f ms, %.1f%% loss).", in.Site, in.Dest.Avg, in.Dest.Loss),
 			"If a session still stutters, press “It's bad right now” the moment it happens."
 	}
+	if !located && in.Dest.Loss >= 100 {
+		return fmt.Sprintf("Nothing is getting through to %s.", in.Site),
+			"If other websites don't load either, restart your router or call your internet provider. " +
+				"If they do, send this report to IT."
+	}
 	if !located {
 		return headline(in, v), "Too few pings in this time range to tell where it starts. " +
 			"Leave Connection Check running or pick a longer range, then send this report to IT."

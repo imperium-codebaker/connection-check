@@ -43,10 +43,15 @@ func carriedValues(route []Hop, m Measure) (carried []float64, located bool) {
 // lossStart returns the hop where the destination's loss most likely starts, scoring every
 // possible start against the whole route at once, as PingPlotter's guide does by eye when
 // it looks for the first hop that shows the destination's problem. ok is false when no
-// owner's start hops hold sureShare of the weight, meaning too few pings to tell.
+// owner's start hops hold sureShare of the weight, meaning too few pings to tell. ok is also
+// false when the destination never answers: hops past the break then look like routers that
+// never answer pings and are left out of route, so nothing places the start.
 func lossStart(route []Hop) (start int, ok bool) {
 	last := len(route) - 1
-	p := min(route[last].Loss/100, 0.999)
+	if route[last].Loss >= 100 {
+		return last, false
+	}
+	p := route[last].Loss / 100
 	score := make([]float64, len(route)) // log-likelihood of starting at s, against starting at the destination
 	start = last
 	for s := last - 1; s >= 0; s-- {
