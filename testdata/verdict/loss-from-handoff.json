@@ -1,0 +1,70 @@
+{
+ "note": "Loss starts at the first carrier after the provider and carries through.",
+ "input": {
+  "site": "Studio LA",
+  "provider": "EXAMPLE-ISP",
+  "hops": [
+   {
+    "ttl": 1,
+    "owner": "home",
+    "answered": true,
+    "sent": 300,
+    "loss": 0,
+    "avg": 0.4,
+    "jitter": 0.1
+   },
+   {
+    "ttl": 2,
+    "owner": "provider",
+    "answered": true,
+    "sent": 300,
+    "loss": 0,
+    "avg": 1.8,
+    "jitter": 0.4
+   },
+   {
+    "ttl": 3,
+    "owner": "provider",
+    "answered": true,
+    "sent": 300,
+    "loss": 0,
+    "avg": 2.6,
+    "jitter": 0.6
+   },
+   {
+    "ttl": 4,
+    "owner": "handoff",
+    "answered": true,
+    "sent": 300,
+    "loss": 2.0,
+    "avg": 6.1,
+    "jitter": 1.5
+   },
+   {
+    "ttl": 5,
+    "owner": "handoff",
+    "answered": true,
+    "sent": 300,
+    "loss": 2.3,
+    "avg": 11.8,
+    "jitter": 1.6
+   }
+  ],
+  "dest": {
+   "ttl": 0,
+   "owner": "site",
+   "answered": true,
+   "sent": 1500,
+   "loss": 2.1,
+   "avg": 12.6,
+   "jitter": 1.8
+  }
+ },
+ "want": {
+  "grade": "poor",
+  "measure": "loss",
+  "owner": "handoff",
+  "blameTtl": 4,
+  "longRoad": false
+ }
+}

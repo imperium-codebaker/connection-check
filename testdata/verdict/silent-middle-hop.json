@@ -1,0 +1,61 @@
+{
+ "note": "A middle router never answers pings; the destination is clean.",
+ "input": {
+  "site": "Studio LA",
+  "provider": "EXAMPLE-ISP",
+  "hops": [
+   {
+    "ttl": 1,
+    "owner": "home",
+    "answered": true,
+    "sent": 300,
+    "loss": 0,
+    "avg": 0.4,
+    "jitter": 0.1
+   },
+   {
+    "ttl": 2,
+    "owner": "provider",
+    "answered": true,
+    "sent": 300,
+    "loss": 0,
+    "avg": 1.8,
+    "jitter": 0.4
+   },
+   {
+    "ttl": 3,
+    "owner": "provider",
+    "answered": false,
+    "sent": 300,
+    "loss": 100,
+    "avg": 0,
+    "jitter": 0
+   },
+   {
+    "ttl": 4,
+    "owner": "handoff",
+    "answered": true,
+    "sent": 300,
+    "loss": 0,
+    "avg": 6.1,
+    "jitter": 1.2
+   }
+  ],
+  "dest": {
+   "ttl": 0,
+   "owner": "site",
+   "answered": true,
+   "sent": 1500,
+   "loss": 0,
+   "avg": 12.4,
+   "jitter": 1.0
+  }
+ },
+ "want": {
+  "grade": "good",
+  "measure": "",
+  "owner": "",
+  "blameTtl": 0,
+  "longRoad": false
+ }
+}

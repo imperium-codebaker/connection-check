@@ -1,0 +1,61 @@
+{
+ "note": "Loss starts inside the provider.",
+ "input": {
+  "site": "Studio LA",
+  "provider": "EXAMPLE-ISP",
+  "hops": [
+   {
+    "ttl": 1,
+    "owner": "home",
+    "answered": true,
+    "sent": 300,
+    "loss": 0,
+    "avg": 0.4,
+    "jitter": 0.1
+   },
+   {
+    "ttl": 2,
+    "owner": "provider",
+    "answered": true,
+    "sent": 300,
+    "loss": 0,
+    "avg": 1.8,
+    "jitter": 0.4
+   },
+   {
+    "ttl": 3,
+    "owner": "provider",
+    "answered": true,
+    "sent": 300,
+    "loss": 0.8,
+    "avg": 2.6,
+    "jitter": 0.6
+   },
+   {
+    "ttl": 4,
+    "owner": "handoff",
+    "answered": true,
+    "sent": 300,
+    "loss": 0.7,
+    "avg": 6.1,
+    "jitter": 1.2
+   }
+  ],
+  "dest": {
+   "ttl": 0,
+   "owner": "site",
+   "answered": true,
+   "sent": 1500,
+   "loss": 0.8,
+   "avg": 12.4,
+   "jitter": 1.0
+  }
+ },
+ "want": {
+  "grade": "poor",
+  "measure": "loss",
+  "owner": "provider",
+  "blameTtl": 3,
+  "longRoad": false
+ }
+}

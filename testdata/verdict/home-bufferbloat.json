@@ -1,0 +1,52 @@
+{
+ "note": "A saturated home link: latency jumps at hop 1 and carries through.",
+ "input": {
+  "site": "Studio LA",
+  "provider": "EXAMPLE-ISP",
+  "hops": [
+   {
+    "ttl": 1,
+    "owner": "home",
+    "answered": true,
+    "sent": 300,
+    "loss": 0,
+    "avg": 80.0,
+    "jitter": 8.0
+   },
+   {
+    "ttl": 2,
+    "owner": "provider",
+    "answered": true,
+    "sent": 300,
+    "loss": 0,
+    "avg": 82.0,
+    "jitter": 8.0
+   },
+   {
+    "ttl": 3,
+    "owner": "handoff",
+    "answered": true,
+    "sent": 300,
+    "loss": 0,
+    "avg": 90.0,
+    "jitter": 8.0
+   }
+  ],
+  "dest": {
+   "ttl": 0,
+   "owner": "site",
+   "answered": true,
+   "sent": 1500,
+   "loss": 0,
+   "avg": 110.0,
+   "jitter": 8.0
+  }
+ },
+ "want": {
+  "grade": "poor",
+  "measure": "latency",
+  "owner": "home",
+  "blameTtl": 1,
+  "longRoad": false
+ }
+}

@@ -1,0 +1,70 @@
+{
+ "note": "One provider router is slow to answer pings (14 ms) while the next shows 3 ms; nothing carries through.",
+ "input": {
+  "site": "Studio LA",
+  "provider": "EXAMPLE-ISP",
+  "hops": [
+   {
+    "ttl": 1,
+    "owner": "home",
+    "answered": true,
+    "sent": 300,
+    "loss": 0,
+    "avg": 0.2,
+    "jitter": 0.0
+   },
+   {
+    "ttl": 2,
+    "owner": "provider",
+    "answered": true,
+    "sent": 300,
+    "loss": 0,
+    "avg": 1.6,
+    "jitter": 0.4
+   },
+   {
+    "ttl": 3,
+    "owner": "provider",
+    "answered": true,
+    "sent": 300,
+    "loss": 0,
+    "avg": 14.9,
+    "jitter": 0.7
+   },
+   {
+    "ttl": 4,
+    "owner": "provider",
+    "answered": true,
+    "sent": 300,
+    "loss": 0,
+    "avg": 3.3,
+    "jitter": 0.6
+   },
+   {
+    "ttl": 5,
+    "owner": "handoff",
+    "answered": true,
+    "sent": 300,
+    "loss": 0,
+    "avg": 6.4,
+    "jitter": 0.7
+   }
+  ],
+  "dest": {
+   "ttl": 0,
+   "owner": "site",
+   "answered": true,
+   "sent": 1500,
+   "loss": 0,
+   "avg": 9.0,
+   "jitter": 0.8
+  }
+ },
+ "want": {
+  "grade": "good",
+  "measure": "",
+  "owner": "",
+  "blameTtl": 0,
+  "longRoad": false
+ }
+}

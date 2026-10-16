@@ -1,0 +1,718 @@
+{
+ "now": 1792128330974,
+ "sites": [
+  {
+   "v": 1,
+   "site": "Studio LA",
+   "host": "remote.example.com",
+   "addr": "192.0.2.47",
+   "from": 1792128030974,
+   "to": 1792128330974,
+   "os": "linux",
+   "mode": {
+    "name": "icmp",
+    "partial": false
+   },
+   "window": "default",
+   "verdict": {
+    "grade": "fair",
+    "measure": "latency",
+    "owner": "site",
+    "blameTtl": 0,
+    "longRoad": true,
+    "headline": "Your connection to Studio LA is usable but slow (62 ms).",
+    "action": "The delay starts after your provider hands you to Studio LA's carrier. Nothing to fix at home. Send the report to IT."
+   },
+   "hops": [
+    {
+     "ttl": 1,
+     "addr": "192.168.1.1",
+     "name": "router.home",
+     "asn": 0,
+     "asName": "",
+     "owner": "home",
+     "answered": true,
+     "sent": 300,
+     "lost": 0,
+     "loss": 0.0,
+     "avg": 0.4,
+     "best": 0.3,
+     "worst": 0.6,
+     "jitter": 0.5,
+     "grade": "good",
+     "place": null
+    },
+    {
+     "ttl": 2,
+     "addr": "198.51.100.1",
+     "name": "bng01.example-isp.net",
+     "asn": 64500,
+     "asName": "EXAMPLE-ISP",
+     "owner": "provider",
+     "answered": true,
+     "sent": 300,
+     "lost": 0,
+     "loss": 0.0,
+     "avg": 1.8,
+     "best": 1.4,
+     "worst": 2.9,
+     "jitter": 0.5,
+     "grade": "good",
+     "place": {
+      "city": "Los Angeles",
+      "lat": 34.05,
+      "lon": -118.24,
+      "approx": false
+     }
+    },
+    {
+     "ttl": 3,
+     "addr": "198.51.100.9",
+     "name": "ber01.lsan.ca.example-isp.net",
+     "asn": 64500,
+     "asName": "EXAMPLE-ISP",
+     "owner": "provider",
+     "answered": true,
+     "sent": 300,
+     "lost": 0,
+     "loss": 0.0,
+     "avg": 2.4,
+     "best": 1.9,
+     "worst": 3.8,
+     "jitter": 0.5,
+     "grade": "good",
+     "place": {
+      "city": "Los Angeles",
+      "lat": 34.05,
+      "lon": -118.24,
+      "approx": false
+     }
+    },
+    {
+     "ttl": 4,
+     "addr": "",
+     "name": "",
+     "asn": 0,
+     "asName": "",
+     "owner": "unknown",
+     "answered": false,
+     "sent": 300,
+     "lost": 0,
+     "loss": 0.0,
+     "avg": 0,
+     "best": 0.0,
+     "worst": 0.0,
+     "jitter": 0.5,
+     "grade": "",
+     "place": null
+    },
+    {
+     "ttl": 5,
+     "addr": "203.0.113.5",
+     "name": "cr10-lax2.carrier.example",
+     "asn": 64501,
+     "asName": "EXAMPLE-CARRIER",
+     "owner": "handoff",
+     "answered": true,
+     "sent": 300,
+     "lost": 0,
+     "loss": 0.0,
+     "avg": 6.4,
+     "best": 5.1,
+     "worst": 10.2,
+     "jitter": 0.5,
+     "grade": "good",
+     "place": {
+      "city": "Los Angeles",
+      "lat": 34.05,
+      "lon": -118.24,
+      "approx": false
+     }
+    },
+    {
+     "ttl": 6,
+     "addr": "203.0.113.77",
+     "name": "ae3.dfw1.carrier.example",
+     "asn": 64501,
+     "asName": "EXAMPLE-CARRIER",
+     "owner": "handoff",
+     "answered": true,
+     "sent": 300,
+     "lost": 0,
+     "loss": 0.0,
+     "avg": 38.0,
+     "best": 30.4,
+     "worst": 60.8,
+     "jitter": 0.5,
+     "grade": "good",
+     "place": {
+      "city": "Dallas",
+      "lat": 32.78,
+      "lon": -96.8,
+      "approx": true
+     }
+    }
+   ],
+   "dest": {
+    "ttl": 0,
+    "addr": "192.0.2.47",
+    "name": "edge.remote.example",
+    "asn": 64502,
+    "asName": "EXAMPLE-SITE",
+    "owner": "site",
+    "answered": true,
+    "sent": 300,
+    "lost": 1,
+    "loss": 0.33,
+    "avg": 62.0,
+    "best": 49.6,
+    "worst": 99.2,
+    "jitter": 5.4,
+    "grade": "fair",
+    "place": null
+   },
+   "timeline": [
+    {
+     "t": 1792127430974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 60
+    },
+    {
+     "t": 1792127440974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 61
+    },
+    {
+     "t": 1792127450974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 62
+    },
+    {
+     "t": 1792127460974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 63
+    },
+    {
+     "t": 1792127470974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 64
+    },
+    {
+     "t": 1792127480974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 65
+    },
+    {
+     "t": 1792127490974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 66
+    },
+    {
+     "t": 1792127500974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 60
+    },
+    {
+     "t": 1792127510974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 61
+    },
+    {
+     "t": 1792127520974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 62
+    },
+    {
+     "t": 1792127530974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 63
+    },
+    {
+     "t": 1792127540974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 64
+    },
+    {
+     "t": 1792127550974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 65
+    },
+    {
+     "t": 1792127560974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 66
+    },
+    {
+     "t": 1792127570974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 60
+    },
+    {
+     "t": 1792127580974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 61
+    },
+    {
+     "t": 1792127590974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 62
+    },
+    {
+     "t": 1792127600974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 63
+    },
+    {
+     "t": 1792127610974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 64
+    },
+    {
+     "t": 1792127620974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 65
+    },
+    {
+     "t": 1792127630974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 66
+    },
+    {
+     "t": 1792127640974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 60
+    },
+    {
+     "t": 1792127650974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 61
+    },
+    {
+     "t": 1792127660974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 62
+    },
+    {
+     "t": 1792127670974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 63
+    },
+    {
+     "t": 1792127680974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 64
+    },
+    {
+     "t": 1792127690974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 65
+    },
+    {
+     "t": 1792127700974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 66
+    },
+    {
+     "t": 1792127710974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 60
+    },
+    {
+     "t": 1792127720974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 61
+    },
+    {
+     "t": 1792127730974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 62
+    },
+    {
+     "t": 1792127740974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 63
+    },
+    {
+     "t": 1792127750974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 64
+    },
+    {
+     "t": 1792127760974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 65
+    },
+    {
+     "t": 1792127770974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 66
+    },
+    {
+     "t": 1792127780974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 60
+    },
+    {
+     "t": 1792127790974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 61
+    },
+    {
+     "t": 1792127800974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 62
+    },
+    {
+     "t": 1792127810974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 63
+    },
+    {
+     "t": 1792127820974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 64
+    },
+    {
+     "t": 1792127830974,
+     "sent": 50,
+     "lost": 1,
+     "avg": 65
+    },
+    {
+     "t": 1792127840974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 66
+    },
+    {
+     "t": 1792127850974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 60
+    },
+    {
+     "t": 1792127860974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 61
+    },
+    {
+     "t": 1792127870974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 62
+    },
+    {
+     "t": 1792127880974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 63
+    },
+    {
+     "t": 1792127890974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 64
+    },
+    {
+     "t": 1792127900974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 65
+    },
+    {
+     "t": 1792127910974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 66
+    },
+    {
+     "t": 1792127920974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 60
+    },
+    {
+     "t": 1792127930974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 61
+    },
+    {
+     "t": 1792127940974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 62
+    },
+    {
+     "t": 1792127950974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 63
+    },
+    {
+     "t": 1792127960974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 64
+    },
+    {
+     "t": 1792127970974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 65
+    },
+    {
+     "t": 1792127980974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 66
+    },
+    {
+     "t": 1792127990974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 60
+    },
+    {
+     "t": 1792128000974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 61
+    },
+    {
+     "t": 1792128010974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 62
+    },
+    {
+     "t": 1792128020974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 63
+    },
+    {
+     "t": 1792128030974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 64
+    },
+    {
+     "t": 1792128040974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 65
+    },
+    {
+     "t": 1792128050974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 66
+    },
+    {
+     "t": 1792128060974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 60
+    },
+    {
+     "t": 1792128070974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 61
+    },
+    {
+     "t": 1792128080974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 62
+    },
+    {
+     "t": 1792128090974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 63
+    },
+    {
+     "t": 1792128100974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 64
+    },
+    {
+     "t": 1792128110974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 65
+    },
+    {
+     "t": 1792128120974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 66
+    },
+    {
+     "t": 1792128130974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 60
+    },
+    {
+     "t": 1792128140974,
+     "sent": 50,
+     "lost": 1,
+     "avg": 61
+    },
+    {
+     "t": 1792128150974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 62
+    },
+    {
+     "t": 1792128160974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 63
+    },
+    {
+     "t": 1792128170974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 64
+    },
+    {
+     "t": 1792128180974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 65
+    },
+    {
+     "t": 1792128190974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 66
+    },
+    {
+     "t": 1792128200974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 60
+    },
+    {
+     "t": 1792128210974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 61
+    },
+    {
+     "t": 1792128220974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 62
+    },
+    {
+     "t": 1792128230974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 63
+    },
+    {
+     "t": 1792128240974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 64
+    },
+    {
+     "t": 1792128250974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 65
+    },
+    {
+     "t": 1792128260974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 66
+    },
+    {
+     "t": 1792128270974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 60
+    },
+    {
+     "t": 1792128280974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 61
+    },
+    {
+     "t": 1792128290974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 62
+    },
+    {
+     "t": 1792128300974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 63
+    },
+    {
+     "t": 1792128310974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 64
+    },
+    {
+     "t": 1792128320974,
+     "sent": 50,
+     "lost": 0,
+     "avg": 65
+    }
+   ]
+  }
+ ]
+}

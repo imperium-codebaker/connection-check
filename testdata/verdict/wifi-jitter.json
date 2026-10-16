@@ -1,0 +1,52 @@
+{
+ "note": "Unsteady Wi-Fi: jitter starts at the home router.",
+ "input": {
+  "site": "Studio LA",
+  "provider": "EXAMPLE-ISP",
+  "hops": [
+   {
+    "ttl": 1,
+    "owner": "home",
+    "answered": true,
+    "sent": 300,
+    "loss": 0,
+    "avg": 9.0,
+    "jitter": 22.0
+   },
+   {
+    "ttl": 2,
+    "owner": "provider",
+    "answered": true,
+    "sent": 300,
+    "loss": 0,
+    "avg": 11.0,
+    "jitter": 23.0
+   },
+   {
+    "ttl": 3,
+    "owner": "handoff",
+    "answered": true,
+    "sent": 300,
+    "loss": 0,
+    "avg": 15.0,
+    "jitter": 21.0
+   }
+  ],
+  "dest": {
+   "ttl": 0,
+   "owner": "site",
+   "answered": true,
+   "sent": 1500,
+   "loss": 0,
+   "avg": 24.0,
+   "jitter": 24.0
+  }
+ },
+ "want": {
+  "grade": "fair",
+  "measure": "jitter",
+  "owner": "home",
+  "blameTtl": 1,
+  "longRoad": false
+ }
+}

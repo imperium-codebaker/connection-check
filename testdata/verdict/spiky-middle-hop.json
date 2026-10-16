@@ -1,0 +1,151 @@
+{
+ "note": "Operator's Atlanta route shape: one carrier router averages 116 ms with spikes while the destination holds 48 ms.",
+ "input": {
+  "site": "Studio LA",
+  "provider": "EXAMPLE-ISP",
+  "hops": [
+   {
+    "ttl": 1,
+    "owner": "home",
+    "answered": true,
+    "sent": 300,
+    "loss": 0,
+    "avg": 0.2,
+    "jitter": 0.0
+   },
+   {
+    "ttl": 2,
+    "owner": "provider",
+    "answered": true,
+    "sent": 300,
+    "loss": 0,
+    "avg": 1.7,
+    "jitter": 0.6
+   },
+   {
+    "ttl": 3,
+    "owner": "provider",
+    "answered": true,
+    "sent": 300,
+    "loss": 0,
+    "avg": 1.7,
+    "jitter": 0.3
+   },
+   {
+    "ttl": 4,
+    "owner": "provider",
+    "answered": true,
+    "sent": 300,
+    "loss": 0,
+    "avg": 14.1,
+    "jitter": 0.3
+   },
+   {
+    "ttl": 5,
+    "owner": "provider",
+    "answered": true,
+    "sent": 300,
+    "loss": 0,
+    "avg": 7.3,
+    "jitter": 7.5
+   },
+   {
+    "ttl": 6,
+    "owner": "unknown",
+    "answered": false,
+    "sent": 300,
+    "loss": 100,
+    "avg": 0,
+    "jitter": 0
+   },
+   {
+    "ttl": 7,
+    "owner": "handoff",
+    "answered": true,
+    "sent": 300,
+    "loss": 0,
+    "avg": 35.9,
+    "jitter": 66.8
+   },
+   {
+    "ttl": 8,
+    "owner": "handoff",
+    "answered": true,
+    "sent": 300,
+    "loss": 0,
+    "avg": 13.0,
+    "jitter": 0.4
+   },
+   {
+    "ttl": 9,
+    "owner": "handoff",
+    "answered": true,
+    "sent": 300,
+    "loss": 0,
+    "avg": 23.2,
+    "jitter": 2.0
+   },
+   {
+    "ttl": 10,
+    "owner": "handoff",
+    "answered": true,
+    "sent": 300,
+    "loss": 0,
+    "avg": 36.2,
+    "jitter": 7.2
+   },
+   {
+    "ttl": 11,
+    "owner": "handoff",
+    "answered": true,
+    "sent": 300,
+    "loss": 0,
+    "avg": 115.9,
+    "jitter": 130.8
+   },
+   {
+    "ttl": 12,
+    "owner": "handoff",
+    "answered": true,
+    "sent": 300,
+    "loss": 0,
+    "avg": 50.3,
+    "jitter": 3.4
+   },
+   {
+    "ttl": 13,
+    "owner": "handoff",
+    "answered": true,
+    "sent": 300,
+    "loss": 0,
+    "avg": 47.0,
+    "jitter": 0.3
+   },
+   {
+    "ttl": 14,
+    "owner": "handoff",
+    "answered": true,
+    "sent": 300,
+    "loss": 0,
+    "avg": 47.1,
+    "jitter": 0.4
+   }
+  ],
+  "dest": {
+   "ttl": 0,
+   "owner": "site",
+   "answered": true,
+   "sent": 1500,
+   "loss": 0,
+   "avg": 48.6,
+   "jitter": 1.4
+  }
+ },
+ "want": {
+  "grade": "good",
+  "measure": "",
+  "owner": "",
+  "blameTtl": 0,
+  "longRoad": false
+ }
+}

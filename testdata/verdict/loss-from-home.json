@@ -1,0 +1,52 @@
+{
+ "note": "Wi-Fi loss: every hop from the home router on shows it.",
+ "input": {
+  "site": "Studio LA",
+  "provider": "EXAMPLE-ISP",
+  "hops": [
+   {
+    "ttl": 1,
+    "owner": "home",
+    "answered": true,
+    "sent": 300,
+    "loss": 3.0,
+    "avg": 4.0,
+    "jitter": 6.0
+   },
+   {
+    "ttl": 2,
+    "owner": "provider",
+    "answered": true,
+    "sent": 300,
+    "loss": 3.3,
+    "avg": 6.0,
+    "jitter": 6.2
+   },
+   {
+    "ttl": 3,
+    "owner": "handoff",
+    "answered": true,
+    "sent": 300,
+    "loss": 2.7,
+    "avg": 9.9,
+    "jitter": 6.1
+   }
+  ],
+  "dest": {
+   "ttl": 0,
+   "owner": "site",
+   "answered": true,
+   "sent": 1500,
+   "loss": 3.1,
+   "avg": 16.0,
+   "jitter": 6.3
+  }
+ },
+ "want": {
+  "grade": "poor",
+  "measure": "loss",
+  "owner": "home",
+  "blameTtl": 1,
+  "longRoad": false
+ }
+}

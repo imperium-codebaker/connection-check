@@ -1,0 +1,124 @@
+{
+ "note": "Operator's real LA route shape (2026-10-15): about 6 ms to the carrier in LA, a silent hop, then 54-67 ms at the site. Addresses and names removed.",
+ "input": {
+  "site": "Studio LA",
+  "provider": "EXAMPLE-ISP",
+  "hops": [
+   {
+    "ttl": 1,
+    "owner": "home",
+    "answered": true,
+    "sent": 300,
+    "loss": 0,
+    "avg": 0.2,
+    "jitter": 0.0
+   },
+   {
+    "ttl": 2,
+    "owner": "provider",
+    "answered": true,
+    "sent": 300,
+    "loss": 0,
+    "avg": 1.6,
+    "jitter": 0.4
+   },
+   {
+    "ttl": 3,
+    "owner": "provider",
+    "answered": true,
+    "sent": 300,
+    "loss": 0,
+    "avg": 2.4,
+    "jitter": 0.7
+   },
+   {
+    "ttl": 4,
+    "owner": "provider",
+    "answered": true,
+    "sent": 300,
+    "loss": 0,
+    "avg": 14.9,
+    "jitter": 0.7
+   },
+   {
+    "ttl": 5,
+    "owner": "provider",
+    "answered": true,
+    "sent": 300,
+    "loss": 0,
+    "avg": 3.3,
+    "jitter": 0.6
+   },
+   {
+    "ttl": 6,
+    "owner": "unknown",
+    "answered": false,
+    "sent": 300,
+    "loss": 100,
+    "avg": 0,
+    "jitter": 0
+   },
+   {
+    "ttl": 7,
+    "owner": "unknown",
+    "answered": true,
+    "sent": 300,
+    "loss": 95,
+    "avg": 7.2,
+    "jitter": 0
+   },
+   {
+    "ttl": 8,
+    "owner": "handoff",
+    "answered": true,
+    "sent": 300,
+    "loss": 0,
+    "avg": 9.1,
+    "jitter": 7.3
+   },
+   {
+    "ttl": 9,
+    "owner": "handoff",
+    "answered": true,
+    "sent": 300,
+    "loss": 0,
+    "avg": 6.4,
+    "jitter": 0.7
+   },
+   {
+    "ttl": 10,
+    "owner": "handoff",
+    "answered": true,
+    "sent": 300,
+    "loss": 0,
+    "avg": 7.1,
+    "jitter": 2.8
+   },
+   {
+    "ttl": 11,
+    "owner": "unknown",
+    "answered": false,
+    "sent": 300,
+    "loss": 100,
+    "avg": 0,
+    "jitter": 0
+   }
+  ],
+  "dest": {
+   "ttl": 0,
+   "owner": "site",
+   "answered": true,
+   "sent": 1500,
+   "loss": 0,
+   "avg": 62.0,
+   "jitter": 6.1
+  }
+ },
+ "want": {
+  "grade": "fair",
+  "measure": "latency",
+  "owner": "site",
+  "blameTtl": 0,
+  "longRoad": true
+ }
+}

@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Connection Check</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="style.css">
+  <script src="vendor/d3-array.min.js" defer></script>
+  <script src="vendor/d3-geo.min.js" defer></script>
+  <script type="module" src="js/app.js"></script>
+</head>
+<body data-mode="live">
+  <header class="bar">
+    <h1 class="brand">Connection Check</h1>
+    <nav id="sites" class="sites" aria-label="Sites"></nav>
+    <span id="status" class="status status-connecting">Connecting…</span>
+  </header>
+
+  <main class="page">
+    <div id="notices" class="notices"></div>
+
+    <section id="loading" class="card quiet">
+      <p>Connecting to the Connection Check program…</p>
+    </section>
+
+    <section id="error" class="card error" hidden>
+      <h2>This report link can't be opened</h2>
+      <p>It may have been cut off when it was copied. Ask for the link again, and paste all of it.</p>
+      <p id="error-detail" class="detail"></p>
+    </section>
+
+    <section id="empty" class="card" hidden>
+      <h2>Which host do you connect to?</h2>
+      <p class="sub">Use the host name from your remote-desktop client.</p>
+      <form id="site-form" class="site-form">
+        <label>Name
+          <input id="site-name" name="name" autocomplete="off" placeholder="Studio LA">
+        </label>
+        <label>Host
+          <input id="site-host" name="host" required autocomplete="off" spellcheck="false" placeholder="remote.example.com">
+        </label>
+        <button type="submit" class="primary">Start checking</button>
+      </form>
+      <p id="site-status" class="action-status" role="status"></p>
+    </section>
+
+    <div id="content" hidden>
+      <section id="verdict" class="card verdict" data-grade="measuring" aria-labelledby="headline">
+        <div class="verdict-main">
+          <span id="grade" class="grade-badge g-measuring">Measuring</span>
+          <div class="verdict-text">
+            <h2 id="headline" class="headline"></h2>
+            <p id="action" class="action"></p>
+          </div>
+        </div>
+        <div class="window-row">
+          <span class="window-kind" id="window-label"></span>
+          <span class="window-range" id="window-range"></span>
+          <button id="back-default" type="button" class="link-button live-only" hidden>Back to last 5 minutes</button>
+        </div>
+        <div class="actions">
+          <button id="bad-now" type="button" class="primary live-only">It's bad right now</button>
+          <button id="copy-report" type="button" class="live-only">Copy report for IT</button>
+          <button id="copy-summary" type="button" class="report-only">Copy summary</button>
+        </div>
+        <p id="action-status" class="action-status" role="status" aria-live="polite"></p>
+        <label id="link-box" class="link-box" hidden>Report link
+          <input id="report-link" readonly spellcheck="false">
+        </label>
+      </section>
+
+      <section class="card" aria-labelledby="map-title">
+        <h2 id="map-title">Route map</h2>
+        <div class="map-wrap">
+          <svg id="map" class="map" viewBox="0 0 975 610" role="img" aria-label="Map of the route from your home to the remote site"></svg>
+        </div>
+        <ul class="legend" aria-label="Map key">
+          <li><span class="key key-home" aria-hidden="true"></span>Home</li>
+          <li><span class="key key-hop" aria-hidden="true"></span>Router (colour shows its grade)</li>
+          <li><span class="key key-approx" aria-hidden="true"></span>Approximate location</li>
+          <li><span class="key key-dest" aria-hidden="true"></span>Remote site</li>
+        </ul>
+        <div id="strip-box" class="strip-box" hidden>
+          <p class="sub">Hops with no known location, in route order:</p>
+          <ol id="strip" class="strip"></ol>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="hops-title">
+        <h2 id="hops-title">Hops</h2>
+        <p class="sub">Every router between you and the remote site, in order. Figures cover the window above.</p>
+        <div class="table-wrap">
+          <table class="hops">
+            <thead>
+              <tr>
+                <th scope="col" class="num">#</th>
+                <th scope="col">Owner</th>
+                <th scope="col">Router (place)</th>
+                <th scope="col" class="stat">Loss</th>
+                <th scope="col" class="stat">Avg</th>
+                <th scope="col" class="stat">Jitter</th>
+                <th scope="col">Grade</th>
+              </tr>
+            </thead>
+            <tbody id="hop-rows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="timeline-title">
+        <h2 id="timeline-title">Destination latency</h2>
+        <p class="sub">Last 15 minutes in 10-second steps. Red ticks are lost pings. The shaded band is the window above.</p>
+        <svg id="timeline" class="timeline" role="img" aria-label="Latency to the destination over time"></svg>
+        <p class="sub live-only">Drag across the chart to look at a moment more closely.</p>
+      </section>
+    </div>
+  </main>
+</body>
+</html>
