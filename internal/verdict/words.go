@@ -3,7 +3,7 @@ package verdict
 import (
 	"fmt"
 
-	"github.com/johncbrubaker/connection-check/internal/owner"
+	"github.com/imperium-codebaker/connection-check/internal/owner"
 )
 
 // words returns the headline and suggested action for v; located is false when the hops

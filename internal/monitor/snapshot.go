@@ -4,12 +4,12 @@ import (
 	"math"
 	"time"
 
-	"github.com/johncbrubaker/connection-check/internal/geo"
-	"github.com/johncbrubaker/connection-check/internal/lookup"
-	"github.com/johncbrubaker/connection-check/internal/owner"
-	"github.com/johncbrubaker/connection-check/internal/report"
-	"github.com/johncbrubaker/connection-check/internal/stats"
-	"github.com/johncbrubaker/connection-check/internal/verdict"
+	"github.com/imperium-codebaker/connection-check/internal/geo"
+	"github.com/imperium-codebaker/connection-check/internal/lookup"
+	"github.com/imperium-codebaker/connection-check/internal/owner"
+	"github.com/imperium-codebaker/connection-check/internal/report"
+	"github.com/imperium-codebaker/connection-check/internal/stats"
+	"github.com/imperium-codebaker/connection-check/internal/verdict"
 )
 
 // snapshot assembles what the page shows for site s over window w at time now.

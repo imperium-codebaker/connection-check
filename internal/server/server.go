@@ -10,9 +10,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/johncbrubaker/connection-check/internal/monitor"
-	"github.com/johncbrubaker/connection-check/internal/report"
-	"github.com/johncbrubaker/connection-check/internal/sites"
+	"github.com/imperium-codebaker/connection-check/internal/monitor"
+	"github.com/imperium-codebaker/connection-check/internal/report"
+	"github.com/imperium-codebaker/connection-check/internal/sites"
 )
 
 // Config is what the server needs besides the monitor.

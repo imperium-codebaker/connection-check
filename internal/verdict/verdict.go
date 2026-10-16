@@ -1,6 +1,6 @@
 package verdict
 
-import "github.com/johncbrubaker/connection-check/internal/owner"
+import "github.com/imperium-codebaker/connection-check/internal/owner"
 
 // Hop is one hop's figures over the window. Loss is in percent, times in ms.
 type Hop struct {

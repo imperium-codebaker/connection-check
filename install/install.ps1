@@ -3,7 +3,7 @@
 param([string[]]$Site = @())
 
 $ErrorActionPreference = 'Stop'
-$repo = 'johncbrubaker/connection-check'
+$repo = 'imperium-codebaker/connection-check'
 $dir = Join-Path $env:LOCALAPPDATA 'connection-check'
 $bin = Join-Path $dir 'connection-check.exe'
 

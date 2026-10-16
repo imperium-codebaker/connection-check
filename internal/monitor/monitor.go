@@ -10,11 +10,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/johncbrubaker/connection-check/internal/lookup"
-	"github.com/johncbrubaker/connection-check/internal/probe"
-	"github.com/johncbrubaker/connection-check/internal/report"
-	"github.com/johncbrubaker/connection-check/internal/sites"
-	"github.com/johncbrubaker/connection-check/internal/stats"
+	"github.com/imperium-codebaker/connection-check/internal/lookup"
+	"github.com/imperium-codebaker/connection-check/internal/probe"
+	"github.com/imperium-codebaker/connection-check/internal/report"
+	"github.com/imperium-codebaker/connection-check/internal/sites"
+	"github.com/imperium-codebaker/connection-check/internal/stats"
 )
 
 // Window kinds the page can choose.

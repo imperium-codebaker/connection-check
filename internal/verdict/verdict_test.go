@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/johncbrubaker/connection-check/internal/owner"
+	"github.com/imperium-codebaker/connection-check/internal/owner"
 )
 
 type traceCase struct {

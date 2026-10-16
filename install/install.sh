@@ -3,7 +3,7 @@
 # Usage: curl -fsSL <release>/install.sh | sh -s -- --site 'Name=host' [--site ...]
 set -eu
 
-repo="johncbrubaker/connection-check"
+repo="imperium-codebaker/connection-check"
 
 case "$(uname -s)" in
   Darwin) os=darwin; dir="$HOME/Library/Application Support/connection-check" ;;

@@ -14,11 +14,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/johncbrubaker/connection-check/internal/monitor"
-	"github.com/johncbrubaker/connection-check/internal/probe"
-	"github.com/johncbrubaker/connection-check/internal/server"
-	"github.com/johncbrubaker/connection-check/internal/sites"
-	"github.com/johncbrubaker/connection-check/web"
+	"github.com/imperium-codebaker/connection-check/internal/monitor"
+	"github.com/imperium-codebaker/connection-check/internal/probe"
+	"github.com/imperium-codebaker/connection-check/internal/server"
+	"github.com/imperium-codebaker/connection-check/internal/sites"
+	"github.com/imperium-codebaker/connection-check/web"
 )
 
 // siteFlags collects repeated --site values.
@@ -39,7 +39,7 @@ func main() {
 	var o options
 	flag.Var(&o.sites, "site", "site to check as 'Name=host[:port]'; repeatable; replaces the saved list")
 	flag.BoolVar(&o.noBrowser, "no-browser", false, "don't open the browser")
-	flag.StringVar(&o.reportBase, "report-base", "https://johncbrubaker.github.io/connection-check/", "report page URL")
+	flag.StringVar(&o.reportBase, "report-base", "https://imperium-codebaker.github.io/connection-check/", "report page URL")
 	flag.DurationVar(&o.runFor, "for", 2*time.Hour, "stop after this long")
 	flag.IntVar(&o.port, "port", 0, "local port for the page (0 picks a free one)")
 	flag.Parse()

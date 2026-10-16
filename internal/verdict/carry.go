@@ -4,7 +4,7 @@ import (
 	"math"
 	"slices"
 
-	"github.com/johncbrubaker/connection-check/internal/owner"
+	"github.com/imperium-codebaker/connection-check/internal/owner"
 )
 
 // Loss-start model. A hop's reply loss is either the loss it carries (the destination's

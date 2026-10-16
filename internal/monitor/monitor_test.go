@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/johncbrubaker/connection-check/internal/lookup"
-	"github.com/johncbrubaker/connection-check/internal/probe"
-	"github.com/johncbrubaker/connection-check/internal/stats"
+	"github.com/imperium-codebaker/connection-check/internal/lookup"
+	"github.com/imperium-codebaker/connection-check/internal/probe"
+	"github.com/imperium-codebaker/connection-check/internal/stats"
 )
 
 // Run under -race: a snapshot taken while the window changes must describe one window.

@@ -1,4 +1,4 @@
-module github.com/johncbrubaker/connection-check
+module github.com/imperium-codebaker/connection-check
 
 go 1.26.0
 

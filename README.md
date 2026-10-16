@@ -30,14 +30,14 @@ installed system-wide and no administrator rights are needed.
 macOS and Linux (Terminal):
 
 ```sh
-curl -fsSL https://github.com/johncbrubaker/connection-check/releases/latest/download/install.sh \
+curl -fsSL https://github.com/imperium-codebaker/connection-check/releases/latest/download/install.sh \
   | sh -s -- --site 'Office=remote.example.com'
 ```
 
 Windows (PowerShell):
 
 ```powershell
-& ([scriptblock]::Create((irm https://github.com/johncbrubaker/connection-check/releases/latest/download/install.ps1))) -Site 'Office=remote.example.com'
+& ([scriptblock]::Create((irm https://github.com/imperium-codebaker/connection-check/releases/latest/download/install.ps1))) -Site 'Office=remote.example.com'
 ```
 
 `--site` takes `Name=host[:port]` and can be repeated. The list is saved, so
@@ -58,7 +58,7 @@ port, traffic split across parallel links, or a host short of CPU.
 
 The report is compressed into the part of the link after `#`, which browsers
 never send to a server. The page at
-<https://johncbrubaker.github.io/connection-check/> decodes it in the browser.
+<https://imperium-codebaker.github.io/connection-check/> decodes it in the browser.
 
 ## Building
 
