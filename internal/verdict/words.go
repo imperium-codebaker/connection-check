@@ -6,11 +6,16 @@ import (
 	"github.com/johncbrubaker/connection-check/internal/owner"
 )
 
-// words returns the headline and suggested action for v.
-func words(in Input, v Verdict) (string, string) {
+// words returns the headline and suggested action for v; located is false when the hops
+// got too few pings to tell where the trouble starts.
+func words(in Input, v Verdict, located bool) (string, string) {
 	if v.Grade == Good {
 		return fmt.Sprintf("Your connection to %s looks fine (%.0f ms, %.1f%% loss).", in.Site, in.Dest.Avg, in.Dest.Loss),
 			"If a session still stutters, press “It's bad right now” the moment it happens."
+	}
+	if !located {
+		return headline(in, v), "Too few pings in this time range to tell where it starts. " +
+			"Leave Connection Check running or pick a longer range, then send this report to IT."
 	}
 	return headline(in, v), action(in, v)
 }

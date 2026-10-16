@@ -52,24 +52,28 @@ func Judge(in Input) Verdict {
 	}
 	g, m := GradeHop(in.Dest)
 	v := Verdict{Grade: g, Measure: m}
+	located := true
 	if g != Good {
-		v.BlameTTL, v.Owner = blame(in, m)
+		v.BlameTTL, v.Owner, located = blame(in, m)
 		v.LongRoad = m == Latency && isFar(v.Owner) && GradeOf(Loss, in.Dest.Loss) == Good &&
 			GradeOf(Jitter, in.Dest.Jitter) == Good
 	}
-	v.Headline, v.Action = words(in, v)
+	v.Headline, v.Action = words(in, v, located)
 	return v
 }
 
 func isFar(o owner.Owner) bool { return o == owner.Handoff || o == owner.Site }
 
 // blame returns the hop where measure m's trouble starts and who owns it.
-// Each hop's figure is capped at the lowest figure of every later hop, so only trouble
-// that carries through to the destination counts; the biggest rise in that capped figure
-// marks the start. A rise under half the destination's figure means no single culprit.
-func blame(in Input, m Measure) (int, owner.Owner) {
+// Only trouble that carries through to the destination counts (carriedValues); the biggest
+// rise in the carried figure marks the start. A rise under half the destination's figure
+// means no single culprit. located is false when the hops got too few pings to tell.
+func blame(in Input, m Measure) (ttl int, who owner.Owner, located bool) {
 	route := append(answered(in.Hops), in.Dest)
-	carried := carriedValues(route, m)
+	carried, located := carriedValues(route, m)
+	if !located {
+		return 0, "", false
+	}
 	at, rise, prev := -1, 0.0, 0.0
 	for i, v := range carried {
 		if v-prev > rise {
@@ -78,12 +82,12 @@ func blame(in Input, m Measure) (int, owner.Owner) {
 		prev = v
 	}
 	if at < 0 || rise < carried[len(carried)-1]/2 {
-		return 0, ""
+		return 0, "", true
 	}
 	if at == len(route)-1 {
-		return 0, owner.Site
+		return 0, owner.Site, true
 	}
-	return route[at].TTL, route[at].Owner
+	return route[at].TTL, route[at].Owner, true
 }
 
 func answered(hops []Hop) []Hop {
@@ -97,14 +101,3 @@ func answered(hops []Hop) []Hop {
 }
 
 func answering(h Hop) bool { return h.Answered && h.Sent > 0 && h.Loss < 100 }
-
-// carriedValues returns each hop's figure capped at the minimum of all later hops.
-func carriedValues(route []Hop, m Measure) []float64 {
-	out := make([]float64, len(route))
-	low := route[len(route)-1].value(m)
-	for i := len(route) - 1; i >= 0; i-- {
-		low = min(low, route[i].value(m))
-		out[i] = low
-	}
-	return out
-}

@@ -104,3 +104,34 @@ func TestHopGradesIgnoreTroubleThatDoesNotCarry(t *testing.T) {
 		t.Errorf("loss that reaches the destination graded %q at its first hop", g)
 	}
 }
+
+// route builds hops with the given loss percents, each sent n pings; a negative loss marks
+// a router limiting its replies (15% loss).
+func route(n int, losses ...float64) []Hop {
+	owners := []owner.Owner{owner.Home, owner.Home, owner.Provider, owner.Provider, owner.Handoff, owner.Handoff}
+	hops := make([]Hop, len(losses))
+	for i, l := range losses {
+		if l < 0 {
+			l = 15
+		}
+		hops[i] = Hop{TTL: i + 1, Owner: owners[i], Answered: true, Sent: n, Loss: l, Avg: float64(i + 1)}
+	}
+	return hops
+}
+
+func TestLossStartingAtHandoffIsPlacedFromTwoMinutes(t *testing.T) {
+	in := Input{Site: "Studio LA", Hops: route(120, 0, -1, 0, 0, 2.5, 1.7),
+		Dest: Hop{Answered: true, Sent: 600, Loss: 2, Avg: 12}}
+	if v := Judge(in); v.Owner != owner.Handoff || v.BlameTTL != 5 {
+		t.Errorf("blamed %q at hop %d, want handoff at hop 5", v.Owner, v.BlameTTL)
+	}
+}
+
+func TestShortWindowAtLowLossSaysItCannotTell(t *testing.T) {
+	in := Input{Site: "Studio LA", Hops: route(60, 0, 0, 0, 0, 0, 0),
+		Dest: Hop{Answered: true, Sent: 300, Loss: 0.4, Avg: 12}}
+	v := Judge(in)
+	if v.Grade != Fair || v.Owner != "" || !strings.Contains(v.Action, "Too few pings") {
+		t.Errorf("got %s owner=%q action=%q", v.Grade, v.Owner, v.Action)
+	}
+}

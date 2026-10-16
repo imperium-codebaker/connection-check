@@ -1,0 +1,124 @@
+{
+ "note": "2% loss on the home link for 2 minutes (netem). One provider hop lost none of its ~120 pings by chance; the start must still be home.",
+ "input": {
+  "site": "Studio LA",
+  "provider": "EXAMPLE-ISP",
+  "hops": [
+   {
+    "ttl": 1,
+    "owner": "home",
+    "answered": true,
+    "sent": 119,
+    "loss": 3.36,
+    "avg": 0.1,
+    "jitter": 0
+   },
+   {
+    "ttl": 2,
+    "owner": "home",
+    "answered": true,
+    "sent": 118,
+    "loss": 15.25,
+    "avg": 0.3,
+    "jitter": 0.2
+   },
+   {
+    "ttl": 3,
+    "owner": "provider",
+    "answered": true,
+    "sent": 119,
+    "loss": 0,
+    "avg": 1.9,
+    "jitter": 0.5
+   },
+   {
+    "ttl": 4,
+    "owner": "provider",
+    "answered": true,
+    "sent": 119,
+    "loss": 0.84,
+    "avg": 1.8,
+    "jitter": 0.5
+   },
+   {
+    "ttl": 5,
+    "owner": "provider",
+    "answered": true,
+    "sent": 119,
+    "loss": 1.68,
+    "avg": 14.6,
+    "jitter": 0.6
+   },
+   {
+    "ttl": 6,
+    "owner": "provider",
+    "answered": true,
+    "sent": 119,
+    "loss": 2.52,
+    "avg": 3.3,
+    "jitter": 0.5
+   },
+   {
+    "ttl": 7,
+    "owner": "handoff",
+    "answered": true,
+    "sent": 116,
+    "loss": 96.55,
+    "avg": 2.5,
+    "jitter": 0.8
+   },
+   {
+    "ttl": 8,
+    "owner": "handoff",
+    "answered": true,
+    "sent": 116,
+    "loss": 93.1,
+    "avg": 6,
+    "jitter": 0.8
+   },
+   {
+    "ttl": 9,
+    "owner": "handoff",
+    "answered": true,
+    "sent": 118,
+    "loss": 2.54,
+    "avg": 11.3,
+    "jitter": 6.7
+   },
+   {
+    "ttl": 10,
+    "owner": "handoff",
+    "answered": true,
+    "sent": 118,
+    "loss": 2.54,
+    "avg": 6.1,
+    "jitter": 0.5
+   },
+   {
+    "ttl": 11,
+    "owner": "handoff",
+    "answered": true,
+    "sent": 118,
+    "loss": 2.54,
+    "avg": 6.4,
+    "jitter": 1
+   }
+  ],
+  "dest": {
+   "ttl": 0,
+   "owner": "site",
+   "answered": true,
+   "sent": 593,
+   "loss": 2.02,
+   "avg": 54.1,
+   "jitter": 0.5
+  }
+ },
+ "want": {
+  "grade": "poor",
+  "measure": "loss",
+  "owner": "home",
+  "blameTtl": 1,
+  "longRoad": false
+ }
+}

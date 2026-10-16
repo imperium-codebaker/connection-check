@@ -55,19 +55,21 @@ func GradeHop(h Hop) (Grade, Measure) {
 	return worst, by
 }
 
-// HopGrades grades each hop on only the trouble that carries through to the destination:
-// each figure is capped at the lowest figure of every later answering hop, so a router
-// that merely ignores or delays pings isn't shown as a fault. Unanswered hops get "".
+// HopGrades grades each hop on only the trouble that carries through to the destination
+// (carriedValues), so a router that merely ignores or delays pings isn't shown as a fault.
+// Unanswered hops get "".
 func HopGrades(hops []Hop, dest Hop) []Grade {
+	route := append(answered(hops), dest)
+	loss, _ := carriedValues(route, Loss)
+	avg, _ := carriedValues(route, Latency)
+	jitter, _ := carriedValues(route, Jitter)
 	out := make([]Grade, len(hops))
-	low := dest
-	for i := len(hops) - 1; i >= 0; i-- {
-		h := hops[i]
-		if !answering(h) {
-			continue
+	j := 0
+	for i, h := range hops {
+		if answering(h) {
+			out[i], _ = GradeHop(Hop{Loss: loss[j], Avg: avg[j], Jitter: jitter[j]})
+			j++
 		}
-		low = Hop{Loss: min(low.Loss, h.Loss), Avg: min(low.Avg, h.Avg), Jitter: min(low.Jitter, h.Jitter)}
-		out[i], _ = GradeHop(low)
 	}
 	return out
 }
