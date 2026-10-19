@@ -1,5 +1,5 @@
 # Downloads Connection Check for this computer and starts it.
-# Usage: & ([scriptblock]::Create((irm <release>/install.ps1))) -Site 'Name=host','Name2=host2'
+# Usage: & ([scriptblock]::Create((irm <release>/install.ps1))) -Site 'Name=host[:port][@airport]','Name2=host2'
 param([string[]]$Site = @())
 
 $ErrorActionPreference = 'Stop'

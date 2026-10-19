@@ -63,6 +63,7 @@ type Place struct {
 	Lat    float64 `json:"lat"`
 	Lon    float64 `json:"lon"`
 	Approx bool    `json:"approx"`
+	Given  bool    `json:"given,omitempty"` // set in the site list, not found from the route
 }
 
 // Bucket summarises destination probes over one timeline slice.

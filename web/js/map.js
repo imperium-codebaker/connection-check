@@ -7,6 +7,7 @@ const SIZE = { w: 975, h: 610 };
 const ZOOM_KM = 150;
 const MIN_ZOOM_W = 40;
 const HOME_OFFSET_PX = 16;
+const UNSEEN_MS = 20;
 
 let projection = null;
 
@@ -51,14 +52,27 @@ function draw(map) {
   if (!map.snap || !width) return;
   const stops = routeStops(map.snap);
   const nodes = placedNodes(stops);
-  const key = JSON.stringify([width, map.snap.site, nodes.map(nodeKey), stops.map(stopKey)]);
+  const unseen = unseenMs(map.snap);
+  const key = JSON.stringify([width, map.snap.site, unseen, nodes.map(nodeKey), stops.map(stopKey)]);
   if (key === map.key) return;
   map.key = key;
   const box = viewBox(nodes);
   const unit = box.w / width;
   map.svg.setAttribute("viewBox", [box.x, box.y, box.w, box.h].map((n) => n.toFixed(1)).join(" "));
-  map.route.replaceChildren(...routeMarks(map.snap, nodes, { unit, box }));
-  renderStrip(map.strip, map.snap, stops);
+  map.route.replaceChildren(...routeMarks(map.snap, nodes, { unit, box, unseen }));
+  renderStrip(map.strip, map.snap, stops, unseen);
+}
+
+/** Milliseconds the destination lies beyond the last router that answers, when that stretch is long. */
+function unseenMs(snap) {
+  const last = snap.hops.findLast((h) => h.answered && h.avg > 0);
+  if (!snap.dest.answered || !last) return 0;
+  const gap = snap.dest.avg - last.avg;
+  return gap >= UNSEEN_MS ? Math.round(gap) : 0;
+}
+
+function unseenText(ms) {
+  return `+${ms} ms with no routers showing`;
 }
 
 function routeStops(snap) {
@@ -83,6 +97,7 @@ function describeNode(node) {
     grade: worstGrade(node.stops.map((s) => s.hop)),
     dest: node.stops.some((s) => s.dest),
     approx: node.stops.every((s) => s.hop.place.approx),
+    given: node.stops.every((s) => s.hop.place.given),
     city: node.stops[0].hop.place.city,
   };
 }
@@ -145,8 +160,15 @@ function routeMarks(snap, nodes, frame) {
   const home = homePoint(nodes, frame);
   const points = [home, ...nodes];
   const segments = nodes.map((node, i) => segment(points[i], node, node.grade, unit));
+  const marks = [];
+  if (frame.unseen && nodes.at(-1).dest) {
+    const [a, b] = points.slice(-2);
+    segments.at(-1).classList.add("unseen");
+    marks.push(label((a.x + b.x) / 2, (a.y + b.y) / 2 - 6 * unit, unseenText(frame.unseen), frame));
+  }
   return [
     ...segments,
+    ...marks,
     homeMark(home, unit),
     ...nodes.map((node) => nodeMark(node, snap.site, unit)),
     ...labels(nodes, snap.site, frame),
@@ -179,7 +201,8 @@ function nodeMark(node, site, unit) {
 }
 
 function nodeTitle(node, site) {
-  const head = node.approx ? `${node.city} (approximate)` : node.city;
+  let head = node.approx ? `${node.city} (approximate)` : node.city;
+  if (node.given) head = `${node.city} (from the site list)`;
   const lines = node.stops.map(({ hop, dest }) => {
     const who = dest ? `${site} (destination)` : `#${hop.ttl} ${routerName(hop)}`;
     return hop.answered ? `${who}: ${gradeWord(hop.grade)}, ${formatMs(hop.avg)}` : `${who}: no reply`;
@@ -217,7 +240,7 @@ function label(px, py, text, { unit, box }) {
   });
 }
 
-function renderStrip(strip, snap, stops) {
+function renderStrip(strip, snap, stops, unseen) {
   const box = strip.parentElement;
   box.hidden = stops.every((s) => s.pt);
   if (box.hidden) return strip.replaceChildren();
@@ -226,7 +249,7 @@ function renderStrip(strip, snap, stops) {
   for (const stop of stops) {
     const city = stop.pt ? stop.hop.place.city : null;
     if (city && city !== lastCity) items.push(anchor(city));
-    if (!city) items.push(stripStop(stop, snap.site));
+    if (!city) items.push(stripStop(stop, snap.site, stop.dest ? unseen : 0));
     lastCity = city;
   }
   strip.replaceChildren(...items);
@@ -237,11 +260,12 @@ function anchor(text) {
     el("span", { class: "pill" }, el("span", { class: "pin", "aria-hidden": "true" }), text));
 }
 
-function stripStop({ hop, dest }, site) {
+function stripStop({ hop, dest }, site, unseen) {
   const grade = hop.answered ? hop.grade || "measuring" : "silent";
   const who = dest ? `${site}'s end` : `#${hop.ttl}`;
   const what = hop.answered ? routerName(hop) : "doesn't answer";
-  const where = hop.place ? ` · ${hop.place.city}` : "";
+  let where = hop.place ? ` · ${hop.place.city}` : "";
+  if (unseen) where += ` · location unknown, ${unseenText(unseen)}`;
   const state = hop.answered ? gradeWord(hop.grade) : "no reply";
   return el("li", { class: `stop g-${grade}`, title: `${who} ${what}${where}: ${state}` },
     el("span", { class: "pill" },

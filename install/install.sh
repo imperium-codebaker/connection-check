@@ -1,6 +1,6 @@
 #!/bin/sh
 # Downloads Connection Check for this computer and starts it.
-# Usage: curl -fsSL <release>/install.sh | sh -s -- --site 'Name=host' [--site ...]
+# Usage: curl -fsSL <release>/install.sh | sh -s -- --site 'Name=host[:port][@airport]' [--site ...]
 set -eu
 
 repo="imperium-codebaker/connection-check"

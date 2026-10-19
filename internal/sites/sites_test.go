@@ -12,6 +12,8 @@ func TestParse(t *testing.T) {
 		"Studio LA=remote.example.com:4172": {Name: "Studio LA", Host: "remote.example.com", Port: 4172},
 		"remote.example.com":                {Name: "remote.example.com", Host: "remote.example.com", Port: 443},
 		"192.0.2.47:4172":                   {Name: "192.0.2.47", Host: "192.0.2.47", Port: 4172},
+		"Studio=remote.example.com@ATL":     {Name: "Studio", Host: "remote.example.com", Port: 443, Place: "atl"},
+		"remote.example.com:4172@lax":       {Name: "remote.example.com", Host: "remote.example.com", Port: 4172, Place: "lax"},
 	}
 	for in, want := range cases {
 		got, err := Parse(in)
@@ -19,7 +21,7 @@ func TestParse(t *testing.T) {
 			t.Errorf("Parse(%q) = %+v, %v; want %+v", in, got, err, want)
 		}
 	}
-	for _, bad := range []string{"", "Name=", "host:99999", "host:abc"} {
+	for _, bad := range []string{"", "Name=", "host:99999", "host:abc", "host@zzz", "host@"} {
 		if _, err := Parse(bad); err == nil {
 			t.Errorf("Parse(%q) accepted", bad)
 		}

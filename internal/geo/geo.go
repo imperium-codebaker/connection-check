@@ -5,6 +5,7 @@ package geo
 import (
 	"math"
 	"sort"
+	"strings"
 )
 
 const (
@@ -29,11 +30,23 @@ type Hop struct {
 // Approx is false when the place came from a CLLI city+state code or from an
 // airport code with a site number attached (such as "lax01"), and true when it
 // came from a lone three-letter token that only happens to match an airport code.
+// Given is true when the place came from the site list rather than the route.
 type Place struct {
 	City   string
 	Lat    float64
 	Lon    float64
 	Approx bool
+	Given  bool
+}
+
+// Airport returns the place of an IATA airport code such as "atl", given by the user,
+// or nil when the code is unknown.
+func Airport(code string) *Place {
+	s, ok := iataSites[strings.ToLower(strings.TrimSpace(code))]
+	if !ok {
+		return nil
+	}
+	return &Place{City: s.City, Lat: s.Lat, Lon: s.Lon, Given: true}
 }
 
 // placer accepts candidates one at a time, keeping each hop's accepted candidate.

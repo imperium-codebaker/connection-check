@@ -10,6 +10,8 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"github.com/imperium-codebaker/connection-check/internal/geo"
 )
 
 // DefaultPort is the TCP port timed when pings are blocked and no port is given.
@@ -17,16 +19,22 @@ const DefaultPort = 443
 
 // Site is one remote host.
 type Site struct {
-	Name string `json:"name"`
-	Host string `json:"host"`
-	Port int    `json:"port"`
+	Name  string `json:"name"`
+	Host  string `json:"host"`
+	Port  int    `json:"port"`
+	Place string `json:"place,omitempty"` // airport code of where the host is, if the route can't show it
 }
 
-// Parse reads "Name=host[:port]" or "host[:port]".
+// Parse reads "Name=host[:port][@place]" or "host[:port][@place]", where place is an
+// airport code such as "atl".
 func Parse(spec string) (Site, error) {
 	name, hostport, found := strings.Cut(spec, "=")
 	if !found {
 		hostport = name
+	}
+	hostport, place, err := cutPlace(hostport, spec)
+	if err != nil {
+		return Site{}, err
 	}
 	host, port := hostport, DefaultPort
 	if h, p, err := net.SplitHostPort(hostport); err == nil {
@@ -44,7 +52,20 @@ func Parse(spec string) (Site, error) {
 	if !found || name == "" {
 		name = host
 	}
-	return Site{Name: name, Host: host, Port: port}, nil
+	return Site{Name: name, Host: host, Port: port, Place: place}, nil
+}
+
+// cutPlace splits an "@place" airport code off hostport and checks that the code is known.
+func cutPlace(hostport, spec string) (rest, place string, err error) {
+	rest, place, found := strings.Cut(hostport, "@")
+	if !found {
+		return rest, "", nil
+	}
+	place = strings.ToLower(strings.TrimSpace(place))
+	if geo.Airport(place) == nil {
+		return "", "", fmt.Errorf("unknown airport code %q in %q", place, spec)
+	}
+	return rest, place, nil
 }
 
 // Path returns where the site list is saved for this user.

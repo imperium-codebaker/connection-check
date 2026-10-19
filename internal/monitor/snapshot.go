@@ -22,6 +22,9 @@ func (m *Monitor) snapshot(s *site, w window, now time.Time) report.Snapshot {
 	dest := s.route.Dest(from, to)
 	n := len(sums)
 	places := geo.PlaceRoute(geoHops(append(sums[:n:n], dest), append(infos[:n:n], destInfo)))
+	if p := geo.Airport(s.cfg.Place); p != nil {
+		places[n] = p
+	}
 	hops := make([]report.Hop, n)
 	for i := range sums {
 		hops[i] = hopRow(i+1, sums[i], infos[i], owners[i], places[i])
@@ -85,7 +88,7 @@ func hopRow(ttl int, s stats.Summary, info lookup.Info, o owner.Owner, p *geo.Pl
 		h.Addr = s.From.String()
 	}
 	if p != nil {
-		h.Place = &report.Place{City: p.City, Lat: p.Lat, Lon: p.Lon, Approx: p.Approx}
+		h.Place = &report.Place{City: p.City, Lat: p.Lat, Lon: p.Lon, Approx: p.Approx, Given: p.Given}
 	}
 	return h
 }

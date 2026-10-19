@@ -291,6 +291,8 @@ body[data-mode="live"] .report-only, body[data-mode="report"] .live-only { displ
 
 .map .seg { stroke: var(--gc); stroke-linecap: round; stroke-dasharray: 7 6; opacity: 0.9; }
 
+.map .seg.unseen { stroke-dasharray: 2 7; opacity: 0.6; }
+
 .map.flowing .seg { animation: flow 0.9s linear infinite; }
 
 @keyframes flow { from { stroke-dashoffset: 13; } to { stroke-dashoffset: 0; } }

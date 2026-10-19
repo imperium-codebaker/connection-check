@@ -41,7 +41,10 @@ Windows (PowerShell):
 & ([scriptblock]::Create((irm https://github.com/imperium-codebaker/connection-check/releases/latest/download/install.ps1))) -Site 'Office=remote.example.com'
 ```
 
-`--site` takes `Name=host[:port]` and can be repeated. The list is saved, so
+`--site` takes `Name=host[:port][@place]` and can be repeated. `place` is an
+airport code such as `atl` for where the host really is. Add it when the route
+can't show that, for example when the last stretch runs over a private link
+whose routers don't appear; the map then pins the host there. The list is saved, so
 later runs need no arguments. The program stops after two hours, or when you
 press Ctrl+C or close the window.
 
