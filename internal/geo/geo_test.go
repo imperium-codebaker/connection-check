@@ -150,3 +150,10 @@ func TestDistanceKm(t *testing.T) {
 		t.Errorf("LAX-JFK = %.0f km, want about 3980", d)
 	}
 }
+
+func TestTableReadsWindowsLineEndings(t *testing.T) {
+	got := parseTable("# code\tcity\tlat\tlon\r\nlax\tLos Angeles, CA\t33.942\t-118.408\r\n")
+	if got["lax"].City != "Los Angeles, CA" || got["lax"].Lon != -118.408 {
+		t.Fatalf("parseTable with CRLF = %v", got)
+	}
+}

@@ -43,6 +43,7 @@ func setOf(s string) map[string]bool {
 func parseTable(data string) map[string]site {
 	table := map[string]site{}
 	for _, line := range strings.Split(data, "\n") {
+		line = strings.TrimSuffix(line, "\r") // a Windows checkout may convert the tables to CRLF
 		f := strings.Split(line, "\t")
 		if len(f) != 4 || strings.HasPrefix(line, "#") {
 			continue
