@@ -10,7 +10,7 @@
     "answered": true,
     "sent": 300,
     "loss": 0,
-    "avg": 80.0,
+    "avg": 250.0,
     "jitter": 8.0
    },
    {
@@ -19,7 +19,7 @@
     "answered": true,
     "sent": 300,
     "loss": 0,
-    "avg": 82.0,
+    "avg": 252.0,
     "jitter": 8.0
    },
    {
@@ -28,7 +28,7 @@
     "answered": true,
     "sent": 300,
     "loss": 0,
-    "avg": 90.0,
+    "avg": 260.0,
     "jitter": 8.0
    }
   ],
@@ -38,7 +38,7 @@
    "answered": true,
    "sent": 1500,
    "loss": 0,
-   "avg": 110.0,
+   "avg": 280.0,
    "jitter": 8.0
   }
  },

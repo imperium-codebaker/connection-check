@@ -3,7 +3,7 @@
 import { formatClock, svgEl } from "./view.js";
 
 const MARGIN = { left: 52, right: 12, top: 12, bottom: 24 };
-const GUIDES = [{ ms: 50, word: "fair" }, { ms: 100, word: "poor" }];
+const GUIDES = [{ ms: 100, word: "fair" }, { ms: 250, word: "poor" }];
 const TICK_MINUTES = [1, 2, 5, 10, 15, 30, 60];
 const MIN_DRAG_PX = 6;
 const PENDING_MS = 4000;

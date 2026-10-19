@@ -15,8 +15,9 @@ browser:
 - "Copy report for IT": a link that opens the same view anywhere, plus a
   plain-text summary.
 
-Grades follow HP Anyware's connection health scale: latency is Fair above 50 ms
-and Poor above 100 ms; loss is Fair above 0.25% and Poor above 0.5%. As in
+Grades follow HP Anyware's own lines. Latency uses its performance health check:
+Fair above 100 ms, Poor above 250 ms. Loss uses its in-session connection health
+indicator: Fair above 0.25%, Poor above 0.5%. As in
 PingPlotter, only the destination decides the grade. A router in the middle that
 drops or delays pings counts only if the trouble carries through to the
 destination; otherwise it is just a router that ignores pings.

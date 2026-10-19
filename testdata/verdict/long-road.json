@@ -1,5 +1,5 @@
 {
- "note": "Operator's real LA route shape (2026-10-15): about 6 ms to the carrier in LA, a silent hop, then 54-67 ms at the site. Addresses and names removed.",
+ "note": "Operator's real LA route shape (2026-10-15): about 6 ms to the carrier in LA, a silent hop, then 54-67 ms at the site. Under HP's 100 ms line, so good. Addresses and names removed.",
  "input": {
   "site": "Studio LA",
   "provider": "EXAMPLE-ISP",
@@ -115,10 +115,10 @@
   }
  },
  "want": {
-  "grade": "fair",
-  "measure": "latency",
-  "owner": "site",
+  "grade": "good",
+  "measure": "",
+  "owner": "",
   "blameTtl": 0,
-  "longRoad": true
+  "longRoad": false
  }
 }

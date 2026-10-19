@@ -64,7 +64,7 @@ func TestGradeOfUsesHPBands(t *testing.T) {
 		v    float64
 		want Grade
 	}{
-		{Latency, 50, Good}, {Latency, 50.1, Fair}, {Latency, 100.1, Poor},
+		{Latency, 100, Good}, {Latency, 100.1, Fair}, {Latency, 250.1, Poor},
 		{Loss, 0.25, Good}, {Loss, 0.33, Fair}, {Loss, 0.51, Poor},
 		{Jitter, 10, Good}, {Jitter, 30.1, Poor},
 	}
@@ -76,9 +76,9 @@ func TestGradeOfUsesHPBands(t *testing.T) {
 }
 
 func TestLongRoadWordingNamesTheSite(t *testing.T) {
-	c := loadCase(t, "../../testdata/verdict/long-road.json")
+	c := loadCase(t, "../../testdata/verdict/long-road-cross-country.json")
 	v := Judge(c.Input)
-	if !strings.Contains(v.Action, "Studio LA") || !strings.Contains(v.Headline, "62 ms") {
+	if !strings.Contains(v.Action, "Studio LA") || !strings.Contains(v.Headline, "130 ms") {
 		t.Errorf("wording: %q / %q", v.Headline, v.Action)
 	}
 }
@@ -100,7 +100,7 @@ func TestTotalLossNamesNoOwner(t *testing.T) {
 
 func TestPoorLatencyIsNotExcusedAsALongRoad(t *testing.T) {
 	in := Input{Site: "Studio LA", Hops: route(300, 0, 0, 0, 0, 0, 0),
-		Dest: Hop{Answered: true, Sent: 1500, Avg: 150}}
+		Dest: Hop{Answered: true, Sent: 1500, Avg: 300}}
 	v := Judge(in)
 	if v.Grade != Poor || v.LongRoad || strings.Contains(v.Action, "not a fault") {
 		t.Errorf("got %s longRoad=%v action=%q", v.Grade, v.LongRoad, v.Action)

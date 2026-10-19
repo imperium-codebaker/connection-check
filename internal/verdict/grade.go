@@ -1,7 +1,7 @@
 // Package verdict grades a connection and names who owns the problem.
 package verdict
 
-// Grade is HP Anyware's connection health scale, plus a state for too little data.
+// Grade is a Good/Fair/Poor rating on HP Anyware's scales, plus a state for too little data.
 type Grade string
 
 // Grades, best first.
@@ -25,9 +25,11 @@ const (
 // MinSamples is the fewest destination probes a verdict needs.
 const MinSamples = 30
 
-// Bands: HP's latency and loss lines; HP's 30 ms variation ceiling sets the Poor jitter line.
+// Bands: latency from HP's Client Performance Health Check (warn above 100 ms, fail above
+// 250 ms); loss from HP's in-session Connection Health indicator; HP's 30 ms variation
+// ceiling sets the Poor jitter line.
 var bands = map[Measure][2]float64{
-	Latency: {50, 100},   // ms: Fair above the first, Poor above the second
+	Latency: {100, 250},  // ms: Fair above the first, Poor above the second
 	Loss:    {0.25, 0.5}, // percent
 	Jitter:  {10, 30},    // ms
 }
