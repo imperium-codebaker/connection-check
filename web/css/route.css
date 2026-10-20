@@ -1,0 +1,182 @@
+/* Your route: the stretch boxes, the two maps and the map key. */
+
+.route { display: grid; gap: 20px; }
+
+.stretches {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
+}
+
+.stretch {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 170px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  min-width: 0;
+}
+
+.stretch.kind-link { border: 2px dashed var(--faint); background: var(--panel); }
+
+.stretch.kind-site { border: 2px solid var(--gc); }
+
+.stretch.blamed { box-shadow: inset 0 0 0 2px var(--highlight-edge); background: var(--highlight); }
+
+.stretch-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.stretch-step .dash { width: 18px; border-top: 3px dashed var(--link); }
+
+.stretch-name { font-weight: 700; font-size: 17px; line-height: 1.3; overflow-wrap: anywhere; }
+
+.stretch-city { color: var(--muted); font-size: 14px; }
+
+.stretch .tag { align-self: flex-start; margin-top: 4px; }
+
+.stretch-figures { margin-top: auto; padding-top: 10px; display: flex; flex-direction: column; gap: 2px; font-size: 14px; }
+
+.stretch-ms { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+.stretch-detail { color: var(--muted); }
+
+/* Maps */
+
+.maps { display: flex; flex-wrap: wrap; gap: 16px; }
+
+.map-figure { margin: 0; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+
+.map-figure.near { flex: 1 1 340px; }
+
+.map-figure.us { flex: 2 1 560px; }
+
+.map-figure figcaption { font-weight: 600; font-size: 15px; }
+
+.map-frame { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--panel); }
+
+.map { display: block; width: 100%; height: auto; }
+
+.near .map { aspect-ratio: 1.6; }
+
+.us .map { aspect-ratio: 975 / 610; }
+
+.map .nation { fill: var(--land); stroke: var(--land-edge); stroke-width: 1; }
+
+.map .states { fill: none; stroke: var(--land-edge); stroke-width: 0.75; }
+
+.map .seg { fill: none; stroke: var(--gc); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+
+.us .map .seg { stroke-width: 3.5; }
+
+.map .seg.link { stroke: var(--link); stroke-width: 3.5; stroke-dasharray: 12 9; }
+
+.map .seg-halo { fill: none; stroke: var(--link); stroke-width: 12; stroke-opacity: 0.15; }
+
+.map .node { fill: var(--gc); stroke: var(--surface); stroke-width: 3; }
+
+.map .node.approx { stroke-dasharray: 3 2.5; }
+
+.map .node.dest { stroke: var(--ink); }
+
+.map .home { fill: var(--surface); stroke: var(--ink); stroke-width: 3; }
+
+.map .near-box { fill: none; stroke: var(--accent); stroke-width: 2; }
+
+.map .maplabel {
+  fill: var(--text);
+  stroke: var(--panel);
+  stroke-width: 5;
+  paint-order: stroke;
+  stroke-linejoin: round;
+  text-anchor: middle;
+  font-weight: 600;
+}
+
+.map .maplabel.end { text-anchor: end; }
+
+.map .maplabel.quiet { fill: var(--muted); font-weight: 500; }
+
+.map .traveller.light { fill: var(--surface); }
+
+.map .traveller.dark { fill: var(--ink); }
+
+.map .pulse-ring, .timeline .pulse-ring {
+  fill: none;
+  stroke: var(--good);
+  stroke-width: 3;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ring 1.6s ease-out infinite;
+}
+
+.map .ripple-ring {
+  fill: none;
+  stroke: var(--loss);
+  stroke-width: 3;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ring 1s ease-out 1 forwards;
+  pointer-events: none;
+}
+
+@keyframes ring {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(3); opacity: 0; }
+}
+
+body[data-mode="report"] .map .traveller, body[data-mode="report"] .pulse-ring { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .map .traveller, .pulse-ring, .ripple-ring { display: none; }
+}
+
+/* Map key */
+
+.legend {
+  list-style: none;
+  margin: 0;
+  padding: 12px 0 0;
+  border-top: 1px solid var(--divider);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  font-size: 14px;
+  color: var(--text-2);
+}
+
+.legend li { display: flex; align-items: center; gap: 8px; }
+
+.key { flex: none; }
+
+.key-traced { width: 28px; height: 4px; border-radius: 2px; background: var(--good); }
+
+.key-link { width: 28px; border-top: 3px dashed var(--link); }
+
+.key-home { width: 12px; height: 12px; border: 2.5px solid var(--ink); border-radius: 3px; }
+
+.key-hop { width: 12px; height: 12px; border-radius: 50%; background: var(--good); }
+
+.key-site { width: 14px; height: 14px; border-radius: 50%; background: var(--good); border: 2.5px solid var(--ink); }
+
+@media (max-width: 600px) {
+  .stretches { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .stretch { min-height: 150px; padding: 12px; }
+  .stretch-ms { font-size: 20px; }
+  .map-figure.near, .map-figure.us { flex-basis: 100%; }
+}
+
+.map .maplabel.start { text-anchor: start; }

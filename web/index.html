@@ -6,16 +6,20 @@
   <meta name="color-scheme" content="light dark">
   <title>Connection Check</title>
   <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/route.css">
+  <link rel="stylesheet" href="css/results.css">
   <script src="vendor/d3-array.min.js" defer></script>
   <script src="vendor/d3-geo.min.js" defer></script>
   <script type="module" src="js/app.js"></script>
 </head>
 <body data-mode="live">
   <header class="bar">
-    <h1 class="brand">Connection Check</h1>
-    <nav id="sites" class="sites" aria-label="Sites"></nav>
-    <span id="status" class="status status-connecting">Connecting…</span>
+    <div class="bar-inner">
+      <h1 class="brand">Connection Check</h1>
+      <nav id="sites" class="sites" aria-label="Sites"></nav>
+      <span id="status" class="status status-connecting">Connecting…</span>
+    </div>
   </header>
 
   <main class="page">
@@ -36,7 +40,7 @@
       <p class="sub">Use the host name from your remote-desktop client.</p>
       <form id="site-form" class="site-form">
         <label>Name
-          <input id="site-name" name="name" autocomplete="off" placeholder="Studio LA">
+          <input id="site-name" name="name" autocomplete="off" placeholder="Office">
         </label>
         <label>Host
           <input id="site-host" name="host" required autocomplete="off" spellcheck="false" placeholder="remote.example.com">
@@ -46,7 +50,7 @@
       <p id="site-status" class="action-status" role="status"></p>
     </section>
 
-    <div id="content" hidden>
+    <div id="content" class="content" hidden>
       <section id="verdict" class="card verdict" data-grade="measuring" aria-labelledby="headline">
         <div class="verdict-main">
           <span id="grade" class="grade-badge g-measuring">Measuring</span>
@@ -54,11 +58,6 @@
             <h2 id="headline" class="headline"></h2>
             <p id="action" class="action"></p>
           </div>
-        </div>
-        <div class="window-row">
-          <span class="window-kind" id="window-label"></span>
-          <span class="window-range" id="window-range"></span>
-          <button id="back-default" type="button" class="link-button live-only" hidden>Back to last 5 minutes</button>
         </div>
         <div class="actions">
           <button id="bad-now" type="button" class="primary live-only">It's bad right now</button>
@@ -71,49 +70,83 @@
         </label>
       </section>
 
-      <section class="card" aria-labelledby="map-title">
-        <h2 id="map-title">Route map</h2>
-        <div class="map-wrap">
-          <svg id="map" class="map" viewBox="0 0 975 610" role="img" aria-label="Map of the route from your home to the remote site"></svg>
+      <section id="route" class="card route" aria-labelledby="route-title">
+        <h2 id="route-title">Your route</h2>
+        <ol id="stretches" class="stretches" aria-label="Route stretches"></ol>
+        <div id="maps" class="maps">
+          <figure id="near-figure" class="map-figure near">
+            <figcaption id="near-title"></figcaption>
+            <div class="map-frame">
+              <svg id="near-map" class="map" viewBox="0 0 640 400" role="img"></svg>
+            </div>
+          </figure>
+          <figure class="map-figure us">
+            <figcaption>Across the country</figcaption>
+            <div class="map-frame">
+              <svg id="us-map" class="map" viewBox="0 0 975 610" role="img" aria-label="Map of the route across the country"></svg>
+            </div>
+          </figure>
         </div>
-        <ul class="legend" aria-label="Map key">
+        <ul id="map-key" class="legend" aria-label="Map key">
+          <li><span class="key key-traced" aria-hidden="true"></span>Traced: routers answer</li>
+          <li><span class="key key-link" aria-hidden="true"></span>Private link: no routers to see</li>
           <li><span class="key key-home" aria-hidden="true"></span>Home</li>
-          <li><span class="key key-hop" aria-hidden="true"></span>Router (colour shows its grade)</li>
-          <li><span class="key key-approx" aria-hidden="true"></span>Approximate location</li>
-          <li><span class="key key-dest" aria-hidden="true"></span>Remote site</li>
+          <li><span class="key key-hop" aria-hidden="true"></span>Router, coloured by grade</li>
+          <li><span class="key key-site" aria-hidden="true"></span>The site</li>
         </ul>
-        <div id="strip-box" class="strip-box" hidden>
-          <p class="sub">Hops with no known location, in route order:</p>
-          <ol id="strip" class="strip"></ol>
-        </div>
       </section>
 
       <section class="card" aria-labelledby="hops-title">
-        <h2 id="hops-title">Hops</h2>
-        <p class="sub">Every router between you and the remote site, in order. Figures cover the window above.</p>
+        <div class="card-head">
+          <h2 id="hops-title">Ping results by router</h2>
+          <a id="window-chip" class="window-chip" href="#timeline-title"><span class="swatch" aria-hidden="true"></span><span id="window-chip-text"></span></a>
+        </div>
         <div class="table-wrap">
-          <table class="hops">
+          <table id="hops" class="hops">
             <thead>
               <tr>
                 <th scope="col" class="num">#</th>
-                <th scope="col">Owner</th>
-                <th scope="col">Router (place)</th>
-                <th scope="col" class="stat">Loss</th>
-                <th scope="col" class="stat">Avg</th>
-                <th scope="col" class="stat">Jitter</th>
-                <th scope="col">Grade</th>
+                <th scope="col">Router</th>
+                <th scope="col">Where</th>
+                <th scope="col" class="stat" title="Share of pings with no reply in the selected time">Loss</th>
+                <th scope="col" class="stat" title="Round trip in ms">Avg</th>
+                <th scope="col" class="stat" title="Average change between replies">Jitter</th>
+                <th scope="col" title="Graded only on trouble that reaches the site">Grade</th>
               </tr>
             </thead>
-            <tbody id="hop-rows"></tbody>
           </table>
         </div>
       </section>
 
       <section class="card" aria-labelledby="timeline-title">
-        <h2 id="timeline-title">Destination latency</h2>
-        <p class="sub">Last 15 minutes in 10-second steps. Red ticks are lost pings. The shaded band is the window above.</p>
-        <svg id="timeline" class="timeline" role="img" aria-label="Latency to the destination over time"></svg>
-        <p class="sub live-only">Drag across the chart to look at a moment more closely.</p>
+        <div class="card-head chart-head">
+          <div class="chart-intro">
+            <h2 id="timeline-title">Over time</h2>
+            <p class="sub">The blue time drives the verdict and the readings at each router.<span class="live-only"> Drag across the chart to change it.</span></p>
+          </div>
+          <div class="toggles">
+            <div id="measure-group" class="segmented" role="group" aria-label="Measure">
+              <button type="button" data-measure="avg" aria-pressed="true">Delay</button>
+              <button type="button" data-measure="loss" aria-pressed="false">Loss</button>
+              <button type="button" data-measure="jitter" aria-pressed="false">Jitter</button>
+            </div>
+            <div id="range-group" class="segmented" role="group" aria-label="Time range">
+              <button type="button" data-range="15" aria-pressed="true">15 min</button>
+              <button type="button" data-range="60" aria-pressed="false">1 hour</button>
+            </div>
+          </div>
+        </div>
+        <svg id="timeline" class="timeline" role="img" aria-label="The connection to the site over time"></svg>
+        <div class="window-controls live-only">
+          <span class="window-controls-label">Blue time</span>
+          <div id="window-group" class="pills" role="group" aria-label="Blue time">
+            <button type="button" data-window="minute" aria-pressed="false">Last minute</button>
+            <button type="button" data-window="default" aria-pressed="true">Last 5 minutes</button>
+            <button type="button" data-window="all" aria-pressed="false">Whole chart</button>
+          </div>
+          <span class="grow"></span>
+          <button id="follow" type="button" class="follow" aria-pressed="true"><span class="dot" aria-hidden="true"></span>Following live</button>
+        </div>
       </section>
     </div>
   </main>

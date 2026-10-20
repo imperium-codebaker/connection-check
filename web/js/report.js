@@ -1,8 +1,8 @@
 // Report links: decoding a snapshot from the URL hash and writing a plain-text summary.
 
-import { blamedRow, normalizeSnapshot, osLabel, routerName } from "./model.js";
+import { KIND_LABELS, blamedRow, normalizeSnapshot, osLabel, routerName } from "./model.js";
 import {
-  formatClock, formatDateTime, formatLoss, formatMs, formatRange, gradeWord, ownerLabel, windowLabel,
+  formatClock, formatDateTime, formatLoss, formatMs, formatShortRange, gradeWord, windowLabel,
 } from "./view.js";
 
 const PREFIX = "#r=";
@@ -48,7 +48,12 @@ function base64urlBytes(encoded) {
 
 /** Return the banner line shown above a report. */
 export function reportBanner(snap) {
-  return `Report from ${formatDateTime(snap.to)}, window ${formatRange(snap.from, snap.to)}, ${osLabel(snap.os)}`;
+  return `Report from ${formatDateTime(snap.to)}, ${osLabel(snap.os)}`;
+}
+
+/** Return the status pill text for a report: "Report · {window name} · {from}–{to}". */
+export function reportStatus(snap) {
+  return `Report · ${windowLabel(snap.window)} · ${formatShortRange(snap.from, snap.to)}`;
 }
 
 /** Return a plain-text summary of a report, ending with its link. */
@@ -75,5 +80,6 @@ function blameLine(snap) {
   const hop = row === "dest" ? snap.dest : snap.hops.find((h) => h.ttl === row);
   if (!hop) return null;
   const where = row === "dest" ? "the destination" : `hop ${hop.ttl}`;
-  return `Problem starts at ${where}: ${routerName(hop)} (${ownerLabel(hop, snap.site)})`;
+  const kind = KIND_LABELS[row === "dest" ? "site" : hop.owner];
+  return `Trouble starts at ${where}: ${routerName(hop)}${kind ? ` (${kind})` : ""}`;
 }

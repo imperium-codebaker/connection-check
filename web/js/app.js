@@ -1,30 +1,30 @@
 // Page entry: chooses live or report mode and wires the views together.
 
+import { createChartControls } from "./chart-controls.js";
 import { renderNotices, renderSites, renderStatus, renderVerdict } from "./header.js";
 import { connectStream, fetchReport, postSite, postWindow } from "./live.js";
-import { createMap } from "./map.js";
+import { createNearMap } from "./map-near.js";
+import { createUsMap } from "./map-us.js";
 import { normalizeSnapshot } from "./model.js";
-import { decodeReport, reportBanner, reportFromHash, summaryText } from "./report.js";
+import { createMotion } from "./motion.js";
+import { decodeReport, reportBanner, reportFromHash, reportStatus, summaryText } from "./report.js";
+import { renderStretches } from "./stretches.js";
 import { renderHops } from "./table.js";
 import { createTimeline } from "./timeline.js";
-import { $, formatDuration } from "./view.js";
+import { $, formatClock, formatDuration, formatShortRange } from "./view.js";
 
 const VIEWS = ["loading", "error", "empty", "content"];
 
-const WINDOW_MESSAGES = {
-  bad: "Marked. The page now shows the minute around this moment. Copy the report for IT while it's fresh.",
-  default: "Showing the last 5 minutes again.",
-  custom: "Showing the range you selected.",
-};
-
 const state = { payload: null, sites: [], site: 0, alive: null, firstSeen: 0, report: null };
-const ui = { map: null, timeline: null };
+const ui = { near: null, us: null, motion: null, timeline: null, controls: null };
 
 boot();
 
 function boot() {
   window.addEventListener("hashchange", () => location.reload());
-  ui.map = createMap($("map"), $("strip"));
+  ui.near = createNearMap($("near-map"), $("near-title"));
+  ui.us = createUsMap($("us-map"));
+  ui.motion = createMotion([$("near-map"), $("us-map")]);
   const encoded = reportFromHash();
   if (encoded === null) bootLive();
   else bootReport(encoded);
@@ -35,6 +35,7 @@ function boot() {
 async function bootReport(encoded) {
   document.body.dataset.mode = "report";
   ui.timeline = createTimeline($("timeline"), null);
+  ui.controls = createChartControls(ui.timeline, null);
   renderStatus("report", "Report");
   try {
     state.report = await decodeReport(encoded);
@@ -43,22 +44,25 @@ async function bootReport(encoded) {
     showView("error");
     return;
   }
+  const snap = state.report;
   $("copy-summary").addEventListener("click", copySummary);
-  renderSites($("sites"), [state.report.site], 0, () => {});
-  showSnapshot(state.report, state.report.to, false);
+  renderSites($("sites"), [{ name: snap.site, grade: snap.verdict.grade }], 0, () => {});
+  renderStatus("report", reportStatus(snap));
+  renderNotices([{ kind: "report", text: reportBanner(snap) }, ...modeNotices(snap)]);
+  showSnapshot(snap, snap.to, false);
 }
 
 function copySummary() {
   showLink(location.href);
-  copyText(summaryText(state.report, location.href), "Copied the summary. Paste it wherever you need it.");
+  copyText(summaryText(state.report, location.href), "Summary copied");
 }
 
 // Live mode
 
 function bootLive() {
   ui.timeline = createTimeline($("timeline"), (from, to) => chooseWindow("custom", { from, to }));
+  ui.controls = createChartControls(ui.timeline, chooseWindow);
   $("bad-now").addEventListener("click", () => chooseWindow("bad"));
-  $("back-default").addEventListener("click", () => chooseWindow("default"));
   $("copy-report").addEventListener("click", copyReport);
   $("site-form").addEventListener("submit", submitSite);
   connectStream(onPayload, onAlive);
@@ -81,7 +85,8 @@ function onAlive(alive) {
 
 function renderLive() {
   const snap = state.sites[state.site] || null;
-  renderSites($("sites"), state.sites.map((s) => s.site), state.site, pickSite);
+  const tabs = state.sites.map((s) => ({ name: s.site, grade: s.verdict.grade }));
+  renderSites($("sites"), tabs, state.site, pickSite);
   renderNotices(liveNotices(snap));
   if (!state.payload) return showView(state.alive === false ? "none" : "loading");
   if (!snap) return showView("empty");
@@ -120,7 +125,7 @@ function pickSite(index) {
 async function chooseWindow(kind, range) {
   try {
     await postWindow(state.site, kind, range);
-    say(WINDOW_MESSAGES[kind]);
+    say(kind === "bad" ? `Marked ${formatClock(Date.now())}` : "");
   } catch (err) {
     say(`Couldn't reach the program: ${err.message}`);
   }
@@ -131,8 +136,8 @@ async function copyReport() {
   button.disabled = true;
   try {
     const report = await fetchReport(state.site);
-    showLink(report.link);
-    await copyText(`${report.link}\n\n${report.text}`, "Copied the report. Paste it into an email or chat to IT.");
+    $("report-link").value = report.link;
+    await copyText(`${report.link}\n\n${report.text}`, "Link copied");
   } catch (err) {
     say(`Couldn't get the report: ${err.message}`);
   } finally {
@@ -157,18 +162,26 @@ async function submitSite(event) {
 
 // Shared rendering
 
-function showSnapshot(snap, now, running) {
-  const notices = document.body.dataset.mode === "report"
-    ? [{ kind: "report", text: reportBanner(snap) }, ...modeNotices(snap)]
-    : null;
-  if (notices) renderNotices(notices);
+function showSnapshot(snap, now, live) {
   showView("content");
-  renderVerdict(snap, running);
-  renderHops($("hop-rows"), snap);
-  ui.timeline.render(snap, now, running);
-  ui.map.render(snap, running);
-  $("bad-now").disabled = !running;
-  $("copy-report").disabled = !running;
+  renderVerdict(snap, live);
+  renderStretches($("stretches"), snap);
+  renderMaps(snap, live);
+  const marks = ui.motion.marks(state.site, snap, live && document.body.dataset.mode === "live");
+  renderHops($("hops"), snap, marks);
+  ui.motion.ripple(marks.lost);
+  $("window-chip-text").textContent = formatShortRange(snap.from, snap.to);
+  ui.timeline.render(snap, now, live);
+  ui.controls.render(snap);
+}
+
+function renderMaps(snap, live) {
+  const motion = live && document.body.dataset.mode === "live";
+  const near = ui.near.render(snap, { live: motion });
+  const us = ui.us.render(snap, { live: motion, near });
+  $("near-figure").hidden = !near;
+  $("maps").hidden = !near && !us;
+  $("map-key").hidden = !near && !us;
 }
 
 function showView(name) {
@@ -189,6 +202,7 @@ async function copyText(text, okMessage) {
     await navigator.clipboard.writeText(text);
     say(okMessage);
   } catch {
+    $("link-box").hidden = false;
     say("Your browser didn't allow copying. Select the link below and copy it instead.");
     $("report-link").select();
   }

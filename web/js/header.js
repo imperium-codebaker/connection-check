@@ -1,21 +1,28 @@
 // Top of the page: site tabs, live status, notices, and the verdict card.
 
-import { $, el, formatRange, gradeWord, windowLabel } from "./view.js";
+import { $, el, gradeWord } from "./view.js";
 
-/** Render site tabs (two or more sites) or the single site name; onPick(index) switches. */
-export function renderSites(nav, names, current, onPick) {
-  const key = `${names.join("\n")}|${current}`;
+/**
+ * Render site tabs (two or more sites) or the single site name.
+ * sites is [{name, grade}]; onPick(index) switches.
+ */
+export function renderSites(nav, sites, current, onPick) {
+  const key = JSON.stringify([sites, current]);
   if (nav.dataset.key === key) return;
   nav.dataset.key = key;
-  if (names.length < 2) {
-    nav.replaceChildren(...names.map((name) => el("span", { class: "site-name", text: name })));
+  if (sites.length < 2) {
+    nav.replaceChildren(...sites.map((s) => el("span", { class: "site-name", text: s.name })));
     return;
   }
-  nav.replaceChildren(...names.map((name, i) => siteTab(name, i === current, () => onPick(i))));
+  nav.replaceChildren(...sites.map((s, i) => siteTab(s, i === current, () => onPick(i))));
 }
 
-function siteTab(name, active, onClick) {
-  const button = el("button", { type: "button", class: "tab", "aria-pressed": String(active), text: name });
+function siteTab(site, active, onClick) {
+  const grade = site.grade || "measuring";
+  const button = el("button", { type: "button", class: "tab", "aria-pressed": String(active) },
+    el("span", { class: `dot g-${grade}`, "aria-hidden": "true" }),
+    site.name,
+    el("span", { class: "visually-hidden", text: `, ${gradeWord(grade)}` }));
   button.addEventListener("click", onClick);
   return button;
 }
@@ -40,8 +47,8 @@ export function renderNotices(notices) {
   })));
 }
 
-/** Render the verdict card and window indicator; interactive shows the window controls. */
-export function renderVerdict(snap, interactive) {
+/** Render the verdict card; running enables the live buttons. */
+export function renderVerdict(snap, running) {
   const grade = snap.verdict.grade || "measuring";
   const badge = $("grade");
   badge.className = `grade-badge g-${grade}`;
@@ -49,7 +56,6 @@ export function renderVerdict(snap, interactive) {
   $("verdict").dataset.grade = grade;
   $("headline").textContent = snap.verdict.headline || `Measuring your connection to ${snap.site}…`;
   $("action").textContent = snap.verdict.action;
-  $("window-label").textContent = windowLabel(snap.window);
-  $("window-range").textContent = formatRange(snap.from, snap.to);
-  $("back-default").hidden = !interactive || snap.window === "default";
+  $("bad-now").disabled = !running || grade === "measuring";
+  $("copy-report").disabled = !running;
 }

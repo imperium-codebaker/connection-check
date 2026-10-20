@@ -6,6 +6,8 @@ const GRADE_WORDS = { good: "Good", fair: "Fair", poor: "Poor", measuring: "Meas
 
 const WINDOW_LABELS = {
   default: "Last 5 minutes",
+  minute: "Last minute",
+  all: "Whole chart",
   bad: "Bad moment (60 s)",
   custom: "Selected range",
 };
@@ -48,15 +50,9 @@ export function gradeChip(grade) {
     el("span", { class: "dot", "aria-hidden": "true" }), gradeWord(key));
 }
 
-/** Return who a hop belongs to, in plain words. */
-export function ownerLabel(hop, siteName) {
-  switch (hop.owner) {
-    case "home": return "Home";
-    case "provider": return hop.asName ? `Your provider (${hop.asName})` : "Your provider";
-    case "handoff": return "Handoff";
-    case "site": return `${siteName}'s end`;
-    default: return "—";
-  }
+/** Return a grey chip with fixed text, for routers that ignore pings or never reply. */
+export function quietChip(text) {
+  return el("span", { class: "chip g-quiet" }, text);
 }
 
 /** Format milliseconds: one decimal below 10 ms, whole numbers above. */
@@ -69,6 +65,21 @@ export function formatMs(ms) {
 export function formatLoss(pct) {
   if (!Number.isFinite(pct) || pct === 0) return "0%";
   return pct < 10 ? `${pct.toFixed(1)}%` : `${Math.round(pct)}%`;
+}
+
+/** Format Unix ms as a short local clock time, such as "2:38 pm". */
+export function formatShortClock(ms) {
+  return new Date(ms).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+}
+
+/** Format a from–to pair of Unix ms as short local clock times. */
+export function formatShortRange(from, to) {
+  return `${formatShortClock(from)}–${formatShortClock(to)}`;
+}
+
+/** Return true when the viewer asked for less motion. */
+export function reducedMotion() {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
 /** Format Unix ms as a local clock time with seconds. */

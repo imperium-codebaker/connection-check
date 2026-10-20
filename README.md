@@ -32,16 +32,17 @@ macOS and Linux (Terminal):
 
 ```sh
 curl -fsSL https://github.com/imperium-codebaker/connection-check/releases/latest/download/install.sh \
-  | sh -s -- --site 'Office=remote.example.com'
+  | sh -s -- --site 'West=west.example.com' --site 'East=east.example.com@atl'
 ```
 
 Windows (PowerShell):
 
 ```powershell
-& ([scriptblock]::Create((irm https://github.com/imperium-codebaker/connection-check/releases/latest/download/install.ps1))) -Site 'Office=remote.example.com'
+& ([scriptblock]::Create((irm https://github.com/imperium-codebaker/connection-check/releases/latest/download/install.ps1))) -Site 'West=west.example.com','East=east.example.com@atl'
 ```
 
-`--site` takes `Name=host[:port][@place]` and can be repeated. `place` is an
+`--site` takes `Name=host[:port][@place]` and can be repeated; each site gets
+its own tab. `place` is an
 airport code such as `atl` for where the host really is. Add it when the route
 can't show that, for example when the last stretch runs over a private link
 whose routers don't appear; the map then pins the host there. The list is saved, so

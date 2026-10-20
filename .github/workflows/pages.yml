@@ -24,7 +24,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Collect the page
-        run: mkdir site && cp -r web/index.html web/style.css web/js web/vendor site/
+        run: mkdir site && cp -r web/index.html web/css web/js web/vendor site/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

@@ -5,5 +5,5 @@ import "embed"
 
 // FS holds the page files.
 //
-//go:embed index.html style.css js vendor
+//go:embed index.html css js vendor
 var FS embed.FS

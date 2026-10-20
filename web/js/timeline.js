@@ -1,137 +1,103 @@
-// Destination latency timeline with loss ticks and drag-to-select.
+// Over time: the site's delay, loss or jitter in 10-second slices, with the blue window,
+// lost pings, route changes, a hover readout and drag-to-select.
 
-import { formatClock, svgEl } from "./view.js";
+import {
+  changeMarks, guides, lostMarks, readout, selection, series, timeTicks, valueMax, windowBand,
+} from "./timeline-marks.js";
+import { reducedMotion, svgEl } from "./view.js";
 
-const MARGIN = { left: 52, right: 12, top: 12, bottom: 24 };
-const GUIDES = [{ ms: 100, word: "fair" }, { ms: 250, word: "poor" }];
-const TICK_MINUTES = [1, 2, 5, 10, 15, 30, 60];
+const MARGIN = { left: 52, right: 12, top: 18, bottom: 24 };
 const MIN_DRAG_PX = 6;
 const PENDING_MS = 4000;
+const SLOT_MS = 10000;
 
-/** Create a timeline on an SVG element; onSelect(from, to) gets drag selections in Unix ms. */
+/**
+ * Create the chart on an SVG element. onSelect(from, to) gets drag selections in Unix ms;
+ * without it the chart is read-only.
+ */
 export function createTimeline(svg, onSelect) {
-  const chart = { svg, onSelect, snap: null, now: 0, interactive: false, drag: null, pending: null };
-  attachDrag(chart);
+  const chart = {
+    svg, onSelect, snap: null, now: 0, live: false, measure: "avg", minutes: 15,
+    drag: null, pending: null, hover: null, scale: null,
+  };
+  chart.plot = svgEl("g");
+  chart.pulse = svgEl("circle", { class: "pulse-ring newest", r: 5, "aria-hidden": "true" });
+  svg.replaceChildren(chart.plot, chart.pulse);
+  attachPointer(chart);
   new ResizeObserver(() => draw(chart)).observe(svg);
   return {
-    render(snap, now, interactive) {
-      Object.assign(chart, { snap, now, interactive: interactive && Boolean(onSelect) });
+    render(snap, now, live) {
+      Object.assign(chart, { snap, now, live });
       expirePending(chart);
       draw(chart);
     },
+    /** Show "avg", "loss" or "jitter". */
+    setMeasure(measure) {
+      chart.measure = measure;
+      draw(chart);
+    },
+    /** Show the last 15 or 60 minutes. */
+    setMinutes(minutes) {
+      chart.minutes = minutes;
+      draw(chart);
+    },
+    /** Return the shown time range as {from, to}. */
+    shown() {
+      return chart.scale ? { from: Math.round(chart.scale.t0), to: Math.round(chart.scale.t1) } : null;
+    },
   };
+}
+
+function interactive(chart) {
+  return chart.live && Boolean(chart.onSelect);
 }
 
 function draw(chart) {
   if (!chart.snap || !chart.svg.clientWidth) return;
   const s = (chart.scale = makeScale(chart));
+  const shown = chart.snap.timeline.filter((b) => b.t + s.span > s.t0 && b.t < s.t1);
   chart.svg.setAttribute("viewBox", `0 0 ${s.width} ${s.height}`);
-  chart.svg.classList.toggle("selectable", chart.interactive);
-  const { line, area } = seriesPaths(chart.snap.timeline, s);
-  chart.svg.replaceChildren(
-    band(s, chart.snap.from, chart.snap.to, "window"),
-    ...yGuides(s), ...xTicks(s),
-    svgEl("path", { class: "area", d: area }),
-    svgEl("path", { class: "line", d: line }),
-    ...lossTicks(chart.snap.timeline, s),
-    selectionBand(chart, s));
+  chart.svg.classList.toggle("selectable", interactive(chart));
+  const sel = chart.drag || chart.pending;
+  chart.plot.replaceChildren(
+    ...windowBand(s, chart.snap.from, chart.snap.to),
+    ...guides(s), ...timeTicks(s),
+    ...series(shown, s),
+    ...lostMarks(shown, s),
+    ...changeMarks(chart.snap.routeChanges, s),
+    sel ? selection(s, sel.from, sel.to) : svgEl("g"),
+    ...(chart.hover !== null && !chart.drag ? readout(shown, s, chart.hover) : []));
+  placePulse(chart, shown, s);
 }
 
 function makeScale(chart) {
   const width = chart.svg.clientWidth;
-  const height = chart.svg.clientHeight || 180;
-  const [t0, t1, span] = timeDomain(chart);
-  const yMax = valueMax(chart.snap.timeline);
+  const height = chart.svg.clientHeight || 220;
+  const { timeline } = chart.snap;
+  const span = timeline.length > 1 ? timeline[1].t - timeline[0].t : SLOT_MS;
+  const end = timeline.length ? timeline.at(-1).t + span : chart.now;
+  const t1 = Math.max(end, chart.live ? chart.now : 0);
+  const t0 = t1 - chart.minutes * 60000;
+  const yMax = valueMax(timeline.filter((b) => b.t >= t0), chart.measure);
   const x0 = MARGIN.left, x1 = width - MARGIN.right;
   const y0 = height - MARGIN.bottom, y1 = MARGIN.top;
   return {
-    width, height, t0, t1, span, yMax, x0, x1, y0, y1,
+    width, height, t0, t1, span, yMax, x0, x1, y0, y1, measure: chart.measure,
+    slot: Math.max(1.5, ((x1 - x0) * span) / (t1 - t0) - 0.5),
     x: (t) => x0 + ((t - t0) / (t1 - t0)) * (x1 - x0),
     y: (v) => y0 - (v / yMax) * (y0 - y1),
     t: (px) => t0 + ((px - x0) / (x1 - x0)) * (t1 - t0),
   };
 }
 
-function timeDomain(chart) {
-  const { timeline, from, to } = chart.snap;
-  const span = timeline.length > 1 ? timeline[1].t - timeline[0].t : 10000;
-  const t0 = timeline.length ? timeline[0].t : Math.min(from, chart.now - 15 * 60000);
-  const end = timeline.length ? timeline.at(-1).t + span : chart.now;
-  return [t0, Math.max(end, chart.now, to, t0 + span), span];
-}
-
-function valueMax(timeline) {
-  const top = Math.max(0, ...timeline.map((b) => b.avg || 0));
-  return Math.max(120, Math.ceil((top * 1.15) / 50) * 50);
-}
-
-function seriesPaths(timeline, s) {
-  let line = "";
-  let area = "";
-  let run = [];
-  const flush = () => {
-    if (!run.length) return;
-    const pts = run.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join("L");
-    line += run.length > 1 ? `M${pts}` : `M${pts}h0.5`;
-    area += `M${run[0][0].toFixed(1)},${s.y0}L${pts}L${run.at(-1)[0].toFixed(1)},${s.y0}Z`;
-    run = [];
-  };
-  for (const b of timeline) {
-    if (b.sent > 0 && b.avg > 0) run.push([s.x(b.t + s.span / 2), s.y(Math.min(b.avg, s.yMax))]);
-    else flush();
-  }
-  flush();
-  return { line, area };
-}
-
-function yGuides(s) {
-  const marks = [svgEl("line", { class: "axis", x1: s.x0, x2: s.x1, y1: s.y0, y2: s.y0 })];
-  marks.push(svgEl("text", { class: "ylabel", x: s.x0 - 6, y: s.y0 + 4, text: "0" }));
-  for (const g of GUIDES) {
-    const y = s.y(g.ms).toFixed(1);
-    marks.push(svgEl("line", { class: `guide guide-${g.word}`, x1: s.x0, x2: s.x1, y1: y, y2: y }));
-    marks.push(svgEl("text", { class: "ylabel", x: s.x0 - 6, y: +y + 4, text: `${g.ms} ms` }));
-    marks.push(svgEl("text", { class: `glabel glabel-${g.word}`, x: s.x1 - 2, y: y - 4, text: g.word }));
-  }
-  return marks;
-}
-
-function xTicks(s) {
-  const pxPerMinute = ((s.x1 - s.x0) * 60000) / (s.t1 - s.t0);
-  const step = (TICK_MINUTES.find((m) => m * pxPerMinute >= 64) || 60) * 60000;
-  const marks = [];
-  for (let t = Math.ceil(s.t0 / step) * step; t <= s.t1; t += step) {
-    const x = s.x(t).toFixed(1);
-    marks.push(svgEl("line", { class: "tick", x1: x, x2: x, y1: s.y0, y2: s.y0 + 4 }));
-    marks.push(svgEl("text", { class: "xlabel", x, y: s.y0 + 16, text: shortClock(t) }));
-  }
-  return marks;
-}
-
-function shortClock(t) {
-  return new Date(t).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
-}
-
-function lossTicks(timeline, s) {
-  const width = Math.max(2, ((s.x1 - s.x0) * s.span) / (s.t1 - s.t0) - 1);
-  return timeline.filter((b) => b.lost > 0).map((b) => {
-    const frac = b.sent ? b.lost / b.sent : 1;
-    const h = 6 + frac * (s.y0 - s.y1 - 6);
-    return svgEl("rect", { class: "loss", x: s.x(b.t).toFixed(1), y: (s.y0 - h).toFixed(1), width, height: h },
-      svgEl("title", { text: `${b.lost} of ${b.sent} pings lost at ${formatClock(b.t)}` }));
-  });
-}
-
-function band(s, from, to, cls) {
-  const a = Math.max(s.x0, s.x(Math.min(from, to)));
-  const b = Math.min(s.x1, s.x(Math.max(from, to)));
-  const width = Math.max(0, b - a);
-  return svgEl("rect", { class: cls, x: a.toFixed(1), y: s.y1, width: width.toFixed(1), height: s.y0 - s.y1 });
-}
-
-function selectionBand(chart, s) {
-  const sel = chart.drag || chart.pending;
-  return sel ? band(s, sel.from, sel.to, "selection") : svgEl("g");
+/** Keep the pulse on the newest point while live; the element persists so its animation runs on. */
+function placePulse(chart, shown, s) {
+  const newest = shown.findLast((b) => b.sent > b.lost && b.avg > 0);
+  const on = chart.live && chart.measure === "avg" && newest && !reducedMotion();
+  chart.pulse.toggleAttribute("hidden", !on);
+  if (!on) return;
+  chart.pulse.setAttribute("cx", s.x(newest.t + s.span / 2).toFixed(1));
+  chart.pulse.setAttribute("cy", s.y(Math.min(newest.avg, s.yMax)).toFixed(1));
 }
 
 function expirePending(chart) {
@@ -139,11 +105,12 @@ function expirePending(chart) {
   if (p && (chart.snap.window === "custom" || Date.now() - p.at > PENDING_MS)) chart.pending = null;
 }
 
-function attachDrag(chart) {
+function attachPointer(chart) {
   const svg = chart.svg;
   svg.addEventListener("pointerdown", (e) => startDrag(chart, e));
-  svg.addEventListener("pointermove", (e) => moveDrag(chart, e));
+  svg.addEventListener("pointermove", (e) => movePointer(chart, e));
   svg.addEventListener("pointerup", (e) => endDrag(chart, e));
+  svg.addEventListener("pointerleave", () => { chart.hover = null; draw(chart); });
   svg.addEventListener("pointercancel", () => { chart.drag = null; draw(chart); });
 }
 
@@ -154,16 +121,17 @@ function pointerTime(chart, e) {
 }
 
 function startDrag(chart, e) {
-  if (!chart.interactive || !chart.scale || e.button !== 0) return;
+  if (!interactive(chart) || !chart.scale || e.button !== 0) return;
   const t = pointerTime(chart, e);
   chart.drag = { from: t, to: t };
   chart.svg.setPointerCapture(e.pointerId);
   draw(chart);
 }
 
-function moveDrag(chart, e) {
-  if (!chart.drag) return;
-  chart.drag.to = pointerTime(chart, e);
+function movePointer(chart, e) {
+  if (!chart.scale) return;
+  if (chart.drag) chart.drag.to = pointerTime(chart, e);
+  else chart.hover = pointerTime(chart, e);
   draw(chart);
 }
 
