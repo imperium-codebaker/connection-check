@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 
@@ -126,6 +127,26 @@ func TestHopGradesIgnoreTroubleThatDoesNotCarry(t *testing.T) {
 	hops[3].Loss = 2
 	if g := HopGrades(hops, dest)[3]; g != Poor {
 		t.Errorf("loss that reaches the destination graded %q at its first hop", g)
+	}
+}
+
+func TestIgnoresPingsMarksRoutersWhoseLossStops(t *testing.T) {
+	hops := []Hop{
+		{TTL: 1, Answered: true, Sent: 100, Loss: 64, Avg: 0.2},
+		{TTL: 2, Answered: false},
+		{TTL: 3, Answered: true, Sent: 100, Loss: 0.4, Avg: 6},
+		{TTL: 4, Answered: true, Sent: 100, Loss: 2, Avg: 7},
+		{TTL: 5, Answered: true, Sent: 100, Loss: 3, Avg: 8},
+	}
+	dest := Hop{Answered: true, Sent: 500, Loss: 0, Avg: 54}
+	got := IgnoresPings(hops, dest)
+	want := []bool{true, false, false, true, true}
+	if !slices.Equal(got, want) {
+		t.Errorf("ignores = %v, want %v", got, want)
+	}
+	dest.Loss = 2.5
+	if got := IgnoresPings(hops, dest); got[3] || got[4] || !got[0] {
+		t.Errorf("with loss reaching the destination, ignores = %v", got)
 	}
 }
 

@@ -9,6 +9,7 @@ import (
 	"github.com/imperium-codebaker/connection-check/internal/owner"
 	"github.com/imperium-codebaker/connection-check/internal/report"
 	"github.com/imperium-codebaker/connection-check/internal/stats"
+	"github.com/imperium-codebaker/connection-check/internal/stretch"
 	"github.com/imperium-codebaker/connection-check/internal/verdict"
 )
 
@@ -32,10 +33,12 @@ func (m *Monitor) snapshot(s *site, w window, now time.Time) report.Snapshot {
 	d := hopRow(0, dest, destInfo, owner.Site, places[n])
 	d.Addr = s.addr.String()
 	gradeHops(hops, &d)
+	v := judge(s.cfg.Name, hops, d)
 	return report.Snapshot{
-		V: 1, Site: s.cfg.Name, Host: s.cfg.Host, Addr: s.addr.String(),
+		V: report.Version, Site: s.cfg.Name, Host: s.cfg.Host, Addr: s.addr.String(),
 		From: from.UnixMilli(), To: to.UnixMilli(), OS: goos, Mode: m.modeInfo(), Window: w.kind,
-		Verdict: judge(s.cfg.Name, hops, d), Hops: hops, Dest: d, Timeline: timeline(s.route, now),
+		Verdict: v, Hops: hops, Dest: d, Timeline: timeline(s.route, now),
+		Stretches: stretch.Build(hops, d, v), RouteChanges: routeChanges(s.route, now),
 	}
 }
 
@@ -102,6 +105,9 @@ func gradeHops(hops []report.Hop, dest *report.Hop) {
 	for i, g := range verdict.HopGrades(vh, verdictHop(*dest)) {
 		hops[i].Grade = string(g)
 	}
+	for i, ignores := range verdict.IgnoresPings(vh, verdictHop(*dest)) {
+		hops[i].Ignores = ignores
+	}
 	if dest.Answered {
 		g, _ := verdict.GradeHop(verdictHop(*dest))
 		dest.Grade = string(g)
@@ -132,7 +138,19 @@ func timeline(r *stats.Route, now time.Time) []report.Bucket {
 	end := now.Truncate(bucketWidth)
 	out := []report.Bucket{}
 	for _, b := range r.Timeline(end.Add(-timelineSpan), end, bucketWidth) {
-		out = append(out, report.Bucket{T: b.Start.UnixMilli(), Sent: b.Sent, Lost: b.Lost, Avg: round(b.Avg, 1)})
+		out = append(out, report.Bucket{T: b.Start.UnixMilli(), Sent: b.Sent, Lost: b.Lost,
+			Avg: round(b.Avg, 1), Jitter: round(b.Jitter, 1)})
+	}
+	return out
+}
+
+// routeChanges returns the route changes the timeline still covers.
+func routeChanges(r *stats.Route, now time.Time) []report.RouteChange {
+	out := []report.RouteChange{}
+	for _, c := range r.Changes() {
+		if c.At.After(now.Add(-timelineSpan)) {
+			out = append(out, report.RouteChange{T: c.At.UnixMilli(), TTL: c.TTL, From: c.From.String(), To: c.To.String()})
+		}
 	}
 	return out
 }

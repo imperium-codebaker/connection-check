@@ -14,7 +14,7 @@ import (
 
 // Run under -race: a snapshot taken while the window changes must describe one window.
 func TestSnapshotWhileWindowChanges(t *testing.T) {
-	s := &site{addr: netip.MustParseAddr("127.0.0.1"), route: stats.NewRoute(), window: window{kind: Default}}
+	s := &site{addr: netip.MustParseAddr("127.0.0.1"), route: stats.NewRoute(), window: window{kind: Default, length: defaultSpan}}
 	m := &Monitor{ctx: context.Background(), eng: probe.NewEngine(nil, nil), look: lookup.New(), sites: []*site{s}}
 	from, to := time.Unix(1_700_000_000, 0), time.Unix(1_700_000_600, 0)
 	var wg sync.WaitGroup
@@ -50,6 +50,17 @@ func TestWindowSpans(t *testing.T) {
 	def, _ := newWindow(Default, time.Time{}, time.Time{}, press)
 	if from, _ := def.span(press); !from.Equal(press.Add(-defaultSpan)) {
 		t.Errorf("default window starts %v", from)
+	}
+	minute, _ := newWindow(Minute, time.Time{}, time.Time{}, press)
+	if from, to := minute.span(press); !from.Equal(press.Add(-time.Minute)) || !to.Equal(press) {
+		t.Errorf("minute window = %v..%v", from, to)
+	}
+	all, _ := newWindow(All, press.Add(-15*time.Minute), press, press)
+	if from, _ := all.span(press.Add(time.Hour)); !from.Equal(press.Add(45 * time.Minute)) {
+		t.Errorf("15-minute whole-chart window should follow now, starts %v", from)
+	}
+	if long, _ := newWindow(All, press.Add(-6*time.Hour), press, press); long.length != timelineSpan {
+		t.Errorf("whole-chart window reaches back %v, longer than the chart", long.length)
 	}
 	if _, err := newWindow(Custom, press, press.Add(-time.Second), press); err == nil {
 		t.Error("backwards custom window accepted")

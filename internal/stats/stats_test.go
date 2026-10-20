@@ -3,6 +3,7 @@ package stats
 import (
 	"math"
 	"net/netip"
+	"slices"
 	"testing"
 	"time"
 )
@@ -66,6 +67,17 @@ func TestBuckets(t *testing.T) {
 	}
 }
 
+func TestBucketJitter(t *testing.T) {
+	var s Series
+	for i, ms := range []float64{10, 14, 10, 14} {
+		s.Add(sample(i, ms, false))
+	}
+	b := s.Buckets(t0, t0.Add(10*time.Second), 10*time.Second)
+	if len(b) != 1 || b[0].Jitter != 4 || b[0].Avg != 12 {
+		t.Fatalf("buckets = %+v", b)
+	}
+}
+
 func TestNewRouterAtAHopStartsAFreshRow(t *testing.T) {
 	old, fresh := netip.MustParseAddr("192.0.2.1"), netip.MustParseAddr("198.51.100.1")
 	at := func(sec int, ms float64, lost bool, from netip.Addr) Sample {
@@ -94,5 +106,24 @@ func TestNewRouterAtAHopStartsAFreshRow(t *testing.T) {
 	r.AddHop(2, at(104, 200, false, old))
 	if back := r.Hops(2, t0, t0.Add(time.Hour))[1]; back.From != old || back.Sent != 1 {
 		t.Errorf("after changing back: %+v", back)
+	}
+	want := []Change{{At: t0.Add(101 * time.Second), TTL: 2, From: old, To: fresh},
+		{At: t0.Add(104 * time.Second), TTL: 2, From: fresh, To: old}}
+	if got := r.Changes(); !slices.Equal(got, want) {
+		t.Errorf("changes = %+v, want %+v", got, want)
+	}
+}
+
+func TestRouteKeepsTheLatestChanges(t *testing.T) {
+	a, b := netip.MustParseAddr("192.0.2.1"), netip.MustParseAddr("192.0.2.2")
+	r := NewRoute()
+	for sec := range KeepChanges + 6 {
+		x := sample(sec, 1, false)
+		x.From = []netip.Addr{a, b}[sec%2]
+		r.AddHop(1, x)
+	}
+	got := r.Changes()
+	if len(got) != KeepChanges || !got[len(got)-1].At.Equal(t0.Add(time.Duration(KeepChanges+5)*time.Second)) {
+		t.Errorf("kept %d changes, last at %v", len(got), got[len(got)-1].At)
 	}
 }

@@ -20,6 +20,8 @@ import (
 // Window kinds the page can choose.
 const (
 	Default = "default" // the last 5 minutes
+	Minute  = "minute"  // the last minute
+	All     = "all"     // the whole span the chart shows, following now
 	Bad     = "bad"     // 30 s either side of the moment the user pressed "It's bad right now"
 	Custom  = "custom"  // a range dragged on the timeline
 )
@@ -27,14 +29,15 @@ const (
 const (
 	defaultSpan  = 5 * time.Minute
 	badHalf      = 30 * time.Second
-	timelineSpan = 15 * time.Minute
+	timelineSpan = stats.Keep
 	bucketWidth  = 10 * time.Second
 )
 
-// window is the time range a site's verdict describes.
+// window is the time range a site's verdict describes; length is set for windows that follow now.
 type window struct {
 	kind     string
 	from, to time.Time
+	length   time.Duration
 }
 
 // span returns the window's range as of now.
@@ -45,7 +48,7 @@ func (w window) span(now time.Time) (time.Time, time.Time) {
 	case Custom:
 		return w.from, w.to
 	}
-	return now.Add(-defaultSpan), now
+	return now.Add(-w.length), now
 }
 
 type site struct {
@@ -80,7 +83,7 @@ func (m *Monitor) Add(cfg sites.Site) error {
 		return err
 	}
 	m.mu.Lock()
-	m.sites = append(m.sites, &site{cfg: cfg, addr: addr, route: stats.NewRoute(), window: window{kind: Default}})
+	m.sites = append(m.sites, &site{cfg: cfg, addr: addr, route: stats.NewRoute(), window: window{kind: Default, length: defaultSpan}})
 	m.mu.Unlock()
 	go m.eng.Trace(m.ctx, addr, cfg.Port)
 	return nil
@@ -97,7 +100,8 @@ func (m *Monitor) Sites() []sites.Site {
 	return out
 }
 
-// SetWindow chooses the window for site i. For Bad the moment is now; for Custom, from and to are used.
+// SetWindow chooses the window for site i. For Bad the moment is now; for Custom, from and
+// to are used; for All, the length of from..to is how far back the window reaches.
 func (m *Monitor) SetWindow(i int, kind string, from, to time.Time) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -114,7 +118,11 @@ func (m *Monitor) SetWindow(i int, kind string, from, to time.Time) error {
 func newWindow(kind string, from, to, now time.Time) (window, error) {
 	switch kind {
 	case Default:
-		return window{kind: Default}, nil
+		return window{kind: Default, length: defaultSpan}, nil
+	case Minute:
+		return window{kind: Minute, length: time.Minute}, nil
+	case All:
+		return window{kind: All, length: min(max(to.Sub(from), time.Minute), timelineSpan)}, nil
 	case Bad:
 		return window{kind: Bad, from: now.Add(-badHalf), to: now.Add(badHalf)}, nil
 	case Custom:

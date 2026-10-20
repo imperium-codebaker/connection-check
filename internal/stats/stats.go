@@ -9,7 +9,7 @@ import (
 )
 
 // Keep is how long samples are retained.
-const Keep = 15 * time.Minute
+const Keep = time.Hour
 
 // Sample is one probe's outcome, stamped with its send time.
 type Sample struct {
@@ -29,9 +29,9 @@ type Summary struct {
 
 // Bucket summarises one slice of a timeline.
 type Bucket struct {
-	Start      time.Time
-	Sent, Lost int
-	Avg        float64
+	Start       time.Time
+	Sent, Lost  int
+	Avg, Jitter float64
 }
 
 // Series holds recent samples for one hop or the destination.
@@ -72,12 +72,22 @@ func (s *Series) Summary(from, to time.Time) Summary {
 	return sum
 }
 
-// Buckets splits [from, to) into slices of width and summarises each.
+// Buckets splits [from, to) into slices of width and summarises each, in one pass over the samples.
 func (s *Series) Buckets(from, to time.Time, width time.Duration) []Bucket {
-	var out []Bucket
-	for start := from; start.Before(to); start = start.Add(width) {
-		sum := s.Summary(start, start.Add(width))
-		out = append(out, Bucket{Start: start, Sent: sum.Sent, Lost: sum.Lost, Avg: sum.Avg})
+	n := int((to.Sub(from) + width - 1) / width)
+	if n <= 0 {
+		return nil
+	}
+	split := make([]Series, n)
+	for _, x := range s.window(from, to) {
+		i := int(x.At.Sub(from) / width)
+		split[i].samples = append(split[i].samples, x)
+	}
+	out := make([]Bucket, n)
+	for i := range split {
+		start := from.Add(time.Duration(i) * width)
+		sum := split[i].Summary(start, start.Add(width))
+		out[i] = Bucket{Start: start, Sent: sum.Sent, Lost: sum.Lost, Avg: sum.Avg, Jitter: sum.Jitter}
 	}
 	return out
 }

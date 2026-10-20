@@ -76,6 +76,25 @@ func HopGrades(hops []Hop, dest Hop) []Grade {
 	return out
 }
 
+// IgnoresPings reports, for each hop, whether it is a router rationing its own replies: it
+// answers, loses more than the Poor share of pings, and no later hop loses more than that
+// share, so its loss never reaches the destination.
+func IgnoresPings(hops []Hop, dest Hop) []bool {
+	poor := bands[Loss][1]
+	out := make([]bool, len(hops))
+	low := 100.0
+	if answering(dest) {
+		low = dest.Loss
+	}
+	for i := len(hops) - 1; i >= 0; i-- {
+		if h := hops[i]; answering(h) {
+			out[i] = h.Loss > poor && low <= poor
+			low = min(low, h.Loss)
+		}
+	}
+	return out
+}
+
 func rank(g Grade) int {
 	switch g {
 	case Fair:

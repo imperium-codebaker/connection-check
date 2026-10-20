@@ -12,12 +12,18 @@ type Snapshot struct {
 	To       int64    `json:"to"`   // window end, Unix ms
 	OS       string   `json:"os"`
 	Mode     Mode     `json:"mode"`
-	Window   string   `json:"window"` // "default", "bad" or "custom"
+	Window   string   `json:"window"` // "default", "minute", "all", "bad" or "custom"
 	Verdict  Verdict  `json:"verdict"`
 	Hops     []Hop    `json:"hops"`
 	Dest     Hop      `json:"dest"`
 	Timeline []Bucket `json:"timeline"`
+
+	Stretches    []Stretch     `json:"stretches"`    // the route in stretches; absent in version 1
+	RouteChanges []RouteChange `json:"routeChanges"` // most recent last; absent in version 1
 }
+
+// Version is the snapshot shape this program writes.
+const Version = 2
 
 // Mode describes how the probes were sent.
 type Mode struct {
@@ -48,12 +54,13 @@ type Hop struct {
 	Answered bool    `json:"answered"`
 	Sent     int     `json:"sent"`
 	Lost     int     `json:"lost"`
-	Loss     float64 `json:"loss"`   // percent
-	Avg      float64 `json:"avg"`    // ms
-	Best     float64 `json:"best"`   // ms
-	Worst    float64 `json:"worst"`  // ms
-	Jitter   float64 `json:"jitter"` // ms, mean difference between consecutive replies
-	Grade    string  `json:"grade"`  // "good", "fair", "poor" or "" when unanswered
+	Loss     float64 `json:"loss"`    // percent
+	Avg      float64 `json:"avg"`     // ms
+	Best     float64 `json:"best"`    // ms
+	Worst    float64 `json:"worst"`   // ms
+	Jitter   float64 `json:"jitter"`  // ms, mean difference between consecutive replies
+	Grade    string  `json:"grade"`   // "good", "fair", "poor" or "" when unanswered
+	Ignores  bool    `json:"ignores"` // loses pings itself but passes no loss on
 	Place    *Place  `json:"place"`
 }
 
@@ -68,8 +75,31 @@ type Place struct {
 
 // Bucket summarises destination probes over one timeline slice.
 type Bucket struct {
-	T    int64   `json:"t"` // slice start, Unix ms
-	Sent int     `json:"sent"`
-	Lost int     `json:"lost"`
-	Avg  float64 `json:"avg"` // ms; 0 when every probe was lost
+	T      int64   `json:"t"` // slice start, Unix ms
+	Sent   int     `json:"sent"`
+	Lost   int     `json:"lost"`
+	Avg    float64 `json:"avg"`    // ms; 0 when every probe was lost
+	Jitter float64 `json:"jitter"` // ms, mean difference between consecutive replies
+}
+
+// Stretch is a run of the route run by one kind of network, or the unseen link before the site.
+type Stretch struct {
+	Kind     string  `json:"kind"`     // "home", "provider", "handoff", "link" or "site"
+	Name     string  `json:"name"`     // short network names, or "{city} to {city}" for a link
+	City     string  `json:"city"`     // where the stretch ends, "" when unknown
+	Approx   bool    `json:"approx"`   // the city is a guess
+	FirstTTL int     `json:"firstTtl"` // first hop in the stretch; 0 when it holds only the destination or nothing
+	LastTTL  int     `json:"lastTtl"`  // last hop before the destination in the stretch, 0 when none
+	Routers  int     `json:"routers"`  // table rows in the stretch, the destination included
+	Ms       float64 `json:"ms"`       // round trip at the stretch's end; for a link, the delay it adds
+	Grade    string  `json:"grade"`    // worst grade in the stretch, "" when nothing is graded
+	Blamed   bool    `json:"blamed"`   // the trouble starts in this stretch
+}
+
+// RouteChange records a hop answering from a different router than before.
+type RouteChange struct {
+	T    int64  `json:"t"` // Unix ms
+	TTL  int    `json:"ttl"`
+	From string `json:"from"`
+	To   string `json:"to"`
 }

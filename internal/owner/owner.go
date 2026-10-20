@@ -1,7 +1,10 @@
 // Package owner labels each hop with who runs it: home, provider, handoff carriers or the remote site.
 package owner
 
-import "net/netip"
+import (
+	"net/netip"
+	"strings"
+)
 
 // Owner names who runs a hop.
 type Owner string
@@ -106,4 +109,15 @@ func nearest(out []Owner, i, step int) Owner {
 
 func isPrivate(a netip.Addr) bool {
 	return a.IsPrivate() || a.IsLinkLocalUnicast() || a.IsLoopback()
+}
+
+// ShortName returns a network's everyday name from its registry name: the organisation
+// after " - " when there is one, cut to its first word, so "EXAMPLE-NET - Example Telecom Inc."
+// gives "Example". It returns "" for "".
+func ShortName(asName string) string {
+	if _, org, found := strings.Cut(asName, " - "); found && strings.TrimSpace(org) != "" {
+		asName = org
+	}
+	first, _, _ := strings.Cut(strings.TrimSpace(asName), " ")
+	return strings.TrimRight(first, ",.;")
 }

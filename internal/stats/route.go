@@ -1,15 +1,28 @@
 package stats
 
 import (
+	"net/netip"
+	"slices"
 	"sync"
 	"time"
 )
 
+// KeepChanges is how many route changes a Route remembers.
+const KeepChanges = 20
+
 // Route holds the samples for every hop toward one destination plus the destination itself.
 type Route struct {
-	mu   sync.Mutex
-	hops map[int]*Series
-	dest Series
+	mu      sync.Mutex
+	hops    map[int]*Series
+	dest    Series
+	changes []Change
+}
+
+// Change records the hop at TTL answering from a different router.
+type Change struct {
+	At       time.Time
+	TTL      int
+	From, To netip.Addr
 }
 
 // NewRoute returns an empty Route.
@@ -19,12 +32,19 @@ func NewRoute() *Route {
 
 // AddHop records a sample for the hop at ttl. A reply from a different router than the one
 // answering there so far starts the hop afresh, dropping the old router's samples, so one
-// row never mixes two routers.
+// row never mixes two routers; the swap is kept as a Change.
 func (r *Route) AddHop(ttl int, x Sample) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	s := r.hops[ttl]
-	if s == nil || !x.Lost && s.router.IsValid() && x.From != s.router {
+	if s != nil && !x.Lost && s.router.IsValid() && x.From != s.router {
+		r.changes = append(r.changes, Change{At: x.At, TTL: ttl, From: s.router, To: x.From})
+		if len(r.changes) > KeepChanges {
+			r.changes = slices.Delete(r.changes, 0, len(r.changes)-KeepChanges)
+		}
+		s = nil
+	}
+	if s == nil {
 		s = &Series{}
 		r.hops[ttl] = s
 	}
@@ -66,4 +86,11 @@ func (r *Route) Timeline(from, to time.Time, width time.Duration) []Bucket {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	return r.dest.Buckets(from, to, width)
+}
+
+// Changes returns the remembered route changes, oldest first.
+func (r *Route) Changes() []Change {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return slices.Clone(r.changes)
 }

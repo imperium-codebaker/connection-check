@@ -48,3 +48,19 @@ func TestClassify(t *testing.T) {
 		}
 	}
 }
+
+func TestShortName(t *testing.T) {
+	cases := map[string]string{
+		"EXAMPLE-BACKBONE - Example Communications Inc.": "Example",
+		"TRANSIT-AS - Sample Business":                   "Sample",
+		"EXAMPLE-ISP":                                    "EXAMPLE-ISP",
+		"Example Networks, Inc.":                         "Example",
+		"ODD-NAME - ":                                    "ODD-NAME",
+		"":                                               "",
+	}
+	for in, want := range cases {
+		if got := ShortName(in); got != want {
+			t.Errorf("ShortName(%q) = %q, want %q", in, got, want)
+		}
+	}
+}
