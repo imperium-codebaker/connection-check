@@ -24,6 +24,10 @@ const (
 // as an unseen link.
 const LinkMs = 20
 
+// NearMs is the largest best round trip at a stretch's end for the stretch to count as near
+// the user: about 1,000 km of fibre.
+const NearMs = 10
+
 var gradeRank = map[string]int{"good": 1, "fair": 2, "poor": 3}
 
 // group is a run of hops with one kind; idx holds indexes into the hops.
@@ -35,13 +39,17 @@ type group struct {
 // Build returns the stretches of a route: hops before the destination in order, the
 // destination, and the verdict for the same window.
 func Build(hops []report.Hop, dest report.Hop, v report.Verdict) []report.Stretch {
-	reach := reached(hops, dest)
+	reach := reached(hops, dest, func(h report.Hop) float64 { return h.Avg })
+	best := reached(hops, dest, func(h report.Hop) float64 { return h.Best })
 	groups := split(hops)
 	out := make([]report.Stretch, 0, len(groups)+2)
 	for _, g := range groups {
-		out = append(out, routeStretch(g, hops, reach))
+		s := routeStretch(g, hops, reach)
+		s.Near = g.kind == Home || nearEnd(g, best)
+		out = append(out, s)
 	}
 	site := siteStretch(lastSite(&out), dest)
+	site.Near = answers(dest) && dest.Best > 0 && dest.Best <= NearMs
 	if link, ok := linkStretch(out, hops, dest, reach); ok {
 		link.Name = linkName(out, site)
 		out = append(out, link)
@@ -60,18 +68,22 @@ func kindOf(o string) string {
 	return ""
 }
 
-// split groups runs of hops with the same kind. An unknown hop joins the run before it;
-// unknown hops at the start join the first known run, or the site when none is known.
+// split groups runs of hops with the same kind. An unknown hop joins the run before it,
+// unless that run is home: hops past the home router belong to the network beyond it.
+// Unknown hops that join no run before them wait for the next run, or join the site when
+// none follows.
 func split(hops []report.Hop) []group {
 	var groups []group
 	var lead []int
 	for i, h := range hops {
 		k := kindOf(h.Owner)
 		switch {
-		case k == "" && len(groups) == 0:
+		case k == "" && (len(groups) == 0 || groups[len(groups)-1].kind == Home):
 			lead = append(lead, i)
 		case k == "" || len(groups) > 0 && k == groups[len(groups)-1].kind:
-			groups[len(groups)-1].idx = append(groups[len(groups)-1].idx, i)
+			last := &groups[len(groups)-1]
+			last.idx = append(append(last.idx, lead...), i)
+			lead = nil
 		default:
 			groups = append(groups, group{kind: k, idx: append(lead, i)})
 			lead = nil
@@ -83,23 +95,33 @@ func split(hops []report.Hop) []group {
 	return groups
 }
 
-// reached returns each answering hop's round trip capped at the lowest of every later
-// answering hop and the destination, since a router that answers pings slowly is no
-// farther away than the routers beyond it; -1 marks a hop with no figure.
-func reached(hops []report.Hop, dest report.Hop) []float64 {
+// reached returns each answering hop's round trip, read by rtt, capped at the lowest of
+// every later answering hop and the destination, since a router that answers pings slowly
+// is no farther away than the routers beyond it; -1 marks a hop with no figure.
+func reached(hops []report.Hop, dest report.Hop, rtt func(report.Hop) float64) []float64 {
 	out := make([]float64, len(hops))
 	low := math.Inf(1)
-	if answers(dest) {
-		low = dest.Avg
+	if answers(dest) && rtt(dest) > 0 {
+		low = rtt(dest)
 	}
 	for i := len(hops) - 1; i >= 0; i-- {
 		out[i] = -1
-		if answers(hops[i]) {
-			low = min(low, hops[i].Avg)
+		if answers(hops[i]) && rtt(hops[i]) > 0 {
+			low = min(low, rtt(hops[i]))
 			out[i] = low
 		}
 	}
 	return out
+}
+
+// nearEnd reports whether the last answering hop of g has a best round trip within NearMs.
+func nearEnd(g group, best []float64) bool {
+	for i := len(g.idx) - 1; i >= 0; i-- {
+		if b := best[g.idx[i]]; b >= 0 {
+			return b <= NearMs
+		}
+	}
+	return false
 }
 
 func answers(h report.Hop) bool { return h.Answered && h.Avg > 0 }

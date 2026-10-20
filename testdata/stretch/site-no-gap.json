@@ -2665,11 +2665,12 @@
    "routers": 1,
    "ms": 0.5,
    "grade": "good",
-   "blamed": false
+   "blamed": false,
+   "near": true
   },
   {
    "kind": "provider",
-   "name": "Example",
+   "name": "Example Internet",
    "city": "Los Angeles",
    "approx": false,
    "firstTtl": 2,
@@ -2677,11 +2678,12 @@
    "routers": 2,
    "ms": 3.1,
    "grade": "good",
-   "blamed": false
+   "blamed": false,
+   "near": true
   },
   {
    "kind": "site",
-   "name": "Remote",
+   "name": "Remote Hosting",
    "city": "Los Angeles",
    "approx": false,
    "firstTtl": 4,
@@ -2689,7 +2691,8 @@
    "routers": 2,
    "ms": 9,
    "grade": "good",
-   "blamed": false
+   "blamed": false,
+   "near": true
   }
  ]
 }

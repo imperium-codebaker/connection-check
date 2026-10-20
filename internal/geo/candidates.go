@@ -29,7 +29,7 @@ type token struct {
 
 // stopWords are router-function and hosting words that must never be read as places.
 var stopWords = setOf("ae be xe et ge te hu fe gi po ve fa si lo eth gig ten tge hge pos atm ser tun " +
-	"cr ccr scr cbr ber bng bb bbr icr mcr rcr ear bar car agr sar per csr asr mpr bdr brd " +
+	"cr ccr scr cbr ber bng bb bbr icr mcr rcr ear bar car rar mar agr sar per csr asr mpr bdr brd " +
 	"core edge agg aggr acc access dist ar br gw rtr pe p rr mx pr cs ds sw ip net com org " +
 	"customer cust static dynamic dsl cable res atlas port channel vlan irb bvi lag bun " +
 	"int ext srv mgmt oob isp bgp ix ixp peer transit link trunk cpe olt lns bras pool " +

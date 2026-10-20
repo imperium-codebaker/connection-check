@@ -94,6 +94,7 @@ type Stretch struct {
 	Ms       float64 `json:"ms"`       // round trip at the stretch's end; for a link, the delay it adds
 	Grade    string  `json:"grade"`    // worst grade in the stretch, "" when nothing is graded
 	Blamed   bool    `json:"blamed"`   // the trouble starts in this stretch
+	Near     bool    `json:"near"`     // the stretch ends close to the user
 }
 
 // RouteChange records a hop answering from a different router than before.

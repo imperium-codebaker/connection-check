@@ -19,7 +19,7 @@ export function createUsMap(svg) {
   svg.replaceChildren(nation, states, map.route, map.motion);
   loadOutline(svg, nation, states);
   return {
-    /** Draw snap; opts.live adds motion, opts.near outlines the first city. Returns false when nothing is placed. */
+    /** Draw snap; opts.live adds motion, opts.near names the city to outline. Returns false when nothing is placed. */
     render(snap, opts) {
       const stops = cityStops(snap);
       if (stops.length) draw(map, snap, stops, opts);
@@ -61,7 +61,8 @@ function segId(map, i) {
 function marks(map, snap, stops, opts) {
   const out = [];
   map.linkLabel = null;
-  if (opts.near) out.push(nearBox(stops.find((s) => !s.dest) || stops[0]));
+  const near = opts.near && stops.find((s) => s.city === opts.near);
+  if (near) out.push(nearBox(near));
   for (let i = 1; i < stops.length; i++) {
     const isLink = opts.linked && i === stops.length - 1;
     const d = segmentPath(stops[i - 1], stops[i]);

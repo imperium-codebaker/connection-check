@@ -111,13 +111,26 @@ func isPrivate(a netip.Addr) bool {
 	return a.IsPrivate() || a.IsLinkLocalUnicast() || a.IsLoopback()
 }
 
+// companyWords end registry names without naming the network.
+var companyWords = map[string]bool{
+	"inc": true, "llc": true, "l.c": true, "ltd": true, "limited": true, "corp": true, "corporation": true,
+	"co": true, "company": true, "b.v": true, "ab": true, "gmbh": true, "plc": true, "parent": true,
+	"holdings": true, "group": true, "enterprises": true, "international": true, "communications": true,
+	"telecommunications": true, "telecom": true, "telephone": true, "technologies": true, "networks": true,
+	"network": true, "business": true, "bandwidth": true, "cable": true, "services": true, "america": true,
+	"connected": true, "cloud": true, "of": true, "and": true, "the": true,
+}
+
 // ShortName returns a network's everyday name from its registry name: the organisation
-// after " - " when there is one, cut to its first word, so "EXAMPLE-NET - Example Telecom Inc."
-// gives "Example". It returns "" for "".
+// after " - " when there is one, without the company words at its end, so
+// "EXAMPLE-NET - Example Telecom Holdings, Inc." gives "Example". It returns "" for "".
 func ShortName(asName string) string {
 	if _, org, found := strings.Cut(asName, " - "); found && strings.TrimSpace(org) != "" {
 		asName = org
 	}
-	first, _, _ := strings.Cut(strings.TrimSpace(asName), " ")
-	return strings.TrimRight(first, ",.;")
+	words := strings.Fields(asName)
+	for len(words) > 1 && companyWords[strings.ToLower(strings.Trim(words[len(words)-1], ",.;"))] {
+		words = words[:len(words)-1]
+	}
+	return strings.TrimRight(strings.Join(words, " "), ",.;- ")
 }

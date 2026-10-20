@@ -103,6 +103,25 @@ func TestLatencyRejectsImpossibleHops(t *testing.T) {
 	}
 }
 
+// Router job codes such as "rar" (regional aggregation) must not read as airports.
+func TestJobCodesAreNotAirports(t *testing.T) {
+	checkRoute(t, []Hop{{"be-10-rar01.town.st.example-cable.net", 10}, {"lo0.mar3.slc.example-isp.net", 12}},
+		[]string{"", "Salt Lake City"})
+}
+
+// A place given for the destination rules out hop places that cannot fit it.
+func TestGivenEndRulesOutFarPlaces(t *testing.T) {
+	hops := []Hop{{"be1.lhr01.example.net", 10}, {"ae4.r22.mia01.example.net", 21}, {"edge.example.net", 31}}
+	got := PlaceRouteTo(hops, Airport("atl"))
+	if want := []string{"", "Miami", "Atlanta"}; cityOf(got[0]) != "" || !strings.HasPrefix(cityOf(got[1]), want[1]) ||
+		!strings.HasPrefix(cityOf(got[2]), want[2]) {
+		t.Errorf("got %q, %q, %q; want %q", cityOf(got[0]), cityOf(got[1]), cityOf(got[2]), want)
+	}
+	if free := PlaceRoute(hops); cityOf(free[0]) == "" {
+		t.Error("without the given end, the far place should still be accepted, or this test proves nothing")
+	}
+}
+
 func TestRealisticRoute(t *testing.T) {
 	hops := []Hop{
 		{"", 1},

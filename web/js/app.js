@@ -5,7 +5,7 @@ import { renderNotices, renderSites, renderStatus, renderVerdict } from "./heade
 import { connectStream, fetchReport, postSite, postWindow } from "./live.js";
 import { createNearMap } from "./map-near.js";
 import { createUsMap } from "./map-us.js";
-import { normalizeSnapshot } from "./model.js";
+import { nearCity, normalizeSnapshot } from "./model.js";
 import { createMotion } from "./motion.js";
 import { decodeReport, reportBanner, reportFromHash, reportStatus, summaryText } from "./report.js";
 import { renderStretches } from "./stretches.js";
@@ -178,7 +178,7 @@ function showSnapshot(snap, now, live) {
 function renderMaps(snap, live) {
   const motion = live && document.body.dataset.mode === "live";
   const near = ui.near.render(snap, { live: motion });
-  const us = ui.us.render(snap, { live: motion, near });
+  const us = ui.us.render(snap, { live: motion, near: near && nearCity(snap) });
   $("near-figure").hidden = !near;
   $("maps").hidden = !near && !us;
   $("map-key").hidden = !near && !us;

@@ -38,7 +38,7 @@ func TestBuildRecordedRoutes(t *testing.T) {
 }
 
 func hop(ttl int, owner string, avg float64) report.Hop {
-	return report.Hop{TTL: ttl, Owner: owner, Answered: avg > 0, Avg: avg, Grade: "good"}
+	return report.Hop{TTL: ttl, Owner: owner, Answered: avg > 0, Avg: avg, Best: avg * 0.9, Grade: "good"}
 }
 
 func kinds(ss []report.Stretch) []string {
@@ -87,5 +87,27 @@ func TestSiteBlameWithoutAHop(t *testing.T) {
 		if s.Blamed != (s.Kind == Site) {
 			t.Errorf("%s blamed = %v", s.Kind, s.Blamed)
 		}
+	}
+}
+
+func TestUnknownHopsAfterHomeJoinTheNextStretch(t *testing.T) {
+	hops := []report.Hop{hop(1, "home", 1), hop(2, "unknown", 40), hop(3, "unknown", 0), hop(4, "provider", 42)}
+	got := Build(hops, hop(0, "site", 50), report.Verdict{})
+	if !reflect.DeepEqual(kinds(got), []string{Home, Provider, Site}) || got[0].Routers != 1 || got[1].FirstTTL != 2 {
+		t.Errorf("got %+v", got)
+	}
+}
+
+func TestNearStretchesEndCloseToTheUser(t *testing.T) {
+	hops := []report.Hop{hop(1, "home", 1), hop(2, "provider", 4), hop(3, "provider", 9), hop(4, "handoff", 30)}
+	slow := hop(5, "handoff", 25)
+	slow.Best = 2 // a router that answers slowly is no farther than its best reply
+	got := Build(append(hops, slow), hop(0, "site", 40), report.Verdict{})
+	var near []bool
+	for _, s := range got {
+		near = append(near, s.Near)
+	}
+	if want := []bool{true, true, true, false}; !reflect.DeepEqual(near, want) {
+		t.Errorf("near = %v, want %v", near, want)
 	}
 }

@@ -51,12 +51,16 @@ func TestClassify(t *testing.T) {
 
 func TestShortName(t *testing.T) {
 	cases := map[string]string{
-		"EXAMPLE-BACKBONE - Example Communications Inc.": "Example",
-		"TRANSIT-AS - Sample Business":                   "Sample",
-		"EXAMPLE-ISP":                                    "EXAMPLE-ISP",
-		"Example Networks, Inc.":                         "Example",
-		"ODD-NAME - ":                                    "ODD-NAME",
-		"":                                               "",
+		"EXAMPLE-BACKBONE - Example Communications Inc.":   "Example",
+		"TRANSIT-AS - Sample Business":                     "Sample",
+		"LEVEL9-AS - Level 9 Parent, LLC":                  "Level 9",
+		"SAMPLE-BELL - Sample Bell Telephone Company LLC":  "Sample Bell",
+		"ORBIT-AS - Orbit Launch Technologies Corporation": "Orbit Launch",
+		"STATE-NET - State of Example":                     "State of Example",
+		"EXAMPLE-ISP":                                      "EXAMPLE-ISP",
+		"Example Networks, Inc.":                           "Example",
+		"ODD-NAME - ":                                      "ODD-NAME",
+		"":                                                 "",
 	}
 	for in, want := range cases {
 		if got := ShortName(in); got != want {

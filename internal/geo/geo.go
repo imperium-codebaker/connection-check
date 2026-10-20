@@ -58,8 +58,19 @@ type placer struct {
 // PlaceRoute takes the hops of one trace in order and returns one entry per
 // hop: a Place, or nil when the hop can't be placed.
 func PlaceRoute(hops []Hop) []*Place {
+	return PlaceRouteTo(hops, nil)
+}
+
+// PlaceRouteTo is PlaceRoute for a route whose last hop is known to be at end, such as a
+// place given in the site list; every other hop's place must then fit it. A nil end
+// leaves the last hop to be placed from its name.
+func PlaceRouteTo(hops []Hop, end *Place) []*Place {
 	hops = capRTTs(hops)
 	p := placer{hops: hops, placed: make([]*candidate, len(hops))}
+	if end != nil && len(hops) > 0 {
+		p.placed[len(hops)-1] = &candidate{hop: len(hops) - 1, site: site{City: end.City, Lat: end.Lat, Lon: end.Lon},
+			strength: clliCity}
+	}
 	for _, c := range rankedCandidates(hops) {
 		if p.placed[c.hop] == nil && p.accepts(c) {
 			p.placed[c.hop] = &c

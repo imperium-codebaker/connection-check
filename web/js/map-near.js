@@ -1,4 +1,4 @@
-// Near you: a schematic chain from home through every stretch in the first city on the route.
+// Near you: a schematic chain from home through every stretch that ends close to the user.
 
 import { label, pulseRing, rowKeys, travelDot, travelSeconds } from "./map-geo.js";
 import { nearCity, siteCity, stretchHops, stretchTitle } from "./model.js";
@@ -40,16 +40,16 @@ function draw(map, snap, city, opts) {
 /** Place home, a dot per stretch in the city, and a stub toward the rest of the route. */
 function layout(snap, city) {
   const list = snap.stretches;
-  const inCity = list.filter((s) => s.kind !== "home" && s.kind !== "link" && s.city === city);
-  const dots = inCity.map((s, i) => {
-    const t = (i + 1) / inCity.length;
+  const nearby = list.filter((s) => s.near && s.kind !== "home" && s.kind !== "link");
+  const dots = nearby.map((s, i) => {
+    const t = (i + 1) / nearby.length;
     return {
       x: HOME.x + (CHAIN_END.x - HOME.x) * t, y: HOME.y + (CHAIN_END.y - HOME.y) * t,
       title: stretchTitle(s, snap.site), grade: s.grade || "measuring", site: s.kind === "site",
       ms: s.ms, keys: rowKeys(stretchHops(snap, s)),
     };
   });
-  const last = inCity.at(-1);
+  const last = nearby.at(-1);
   const after = list[list.indexOf(last) + 1];
   const stub = after && !dots.at(-1).site ? {
     link: after.kind === "link",

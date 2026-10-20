@@ -18,6 +18,7 @@ const EMPTY_HOP = {
 
 const EMPTY_STRETCH = {
   kind: "site", name: "", city: "", approx: false, firstTtl: 0, lastTtl: 0, routers: 0, ms: 0, grade: "", blamed: false,
+  near: false,
 };
 
 /**
@@ -96,9 +97,9 @@ export function osLabel(os) {
   return OS_NAMES[String(os).toLowerCase()] || os || "unknown system";
 }
 
-/** Return the city of the first stretch before the site that has one, or "" when none does. */
+/** Return the city of the first stretch past home that ends near the user, or "" when none has a place. */
 export function nearCity(snap) {
-  return snap.stretches?.find((s) => s.kind !== "link" && s.kind !== "site" && s.city)?.city || "";
+  return snap.stretches?.find((s) => s.near && s.kind !== "home" && s.kind !== "link" && s.city)?.city || "";
 }
 
 /** Return the city of the site, from the destination or the site stretch. */

@@ -22,9 +22,10 @@ func (m *Monitor) snapshot(s *site, w window, now time.Time) report.Snapshot {
 	owners := owner.Classify(ownerHops(sums, infos), destInfo.ASN)
 	dest := s.route.Dest(from, to)
 	n := len(sums)
-	places := geo.PlaceRoute(geoHops(append(sums[:n:n], dest), append(infos[:n:n], destInfo)))
-	if p := geo.Airport(s.cfg.Place); p != nil {
-		places[n] = p
+	given := geo.Airport(s.cfg.Place)
+	places := geo.PlaceRouteTo(geoHops(append(sums[:n:n], dest), append(infos[:n:n], destInfo)), given)
+	if given != nil {
+		places[n] = given
 	}
 	hops := make([]report.Hop, n)
 	for i := range sums {
